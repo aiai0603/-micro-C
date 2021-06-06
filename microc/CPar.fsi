@@ -37,6 +37,10 @@ type token =
   | VOID
   | WHILE
   | FOR
+  | DOWHILE
+  | DO
+  | UNTIL
+  | DOUNTIL
   | CSTSTRING of (string)
   | NAME of (string)
   | CSTINT of (int)
@@ -78,6 +82,10 @@ type tokenId =
     | TOKEN_VOID
     | TOKEN_WHILE
     | TOKEN_FOR
+    | TOKEN_DOWHILE
+    | TOKEN_DO
+    | TOKEN_UNTIL
+    | TOKEN_DOUNTIL
     | TOKEN_CSTSTRING
     | TOKEN_NAME
     | TOKEN_CSTINT

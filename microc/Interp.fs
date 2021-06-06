@@ -231,7 +231,6 @@ let rec exec stmt (locEnv : locEnv) (gloEnv : gloEnv) (store : store) : store =
     | Return _ -> failwith "return not implemented"  // 解释器没有实现 return
     | For(dec,e,start,body) -> failwith "for not implemented" 
     | DoWhile(body,e) -> 
-      
       let rec loop store1 =
                 //求值 循环条件,注意变更环境 store
               let (v, store2) = eval e locEnv gloEnv store1
@@ -239,7 +238,7 @@ let rec exec stmt (locEnv : locEnv) (gloEnv : gloEnv) (store : store) : store =
               if v<>0 then loop (exec body locEnv gloEnv store2)
                       else store2  //退出循环返回 环境store2
       loop (exec body locEnv gloEnv store)
-    | DoUtil(body,e) -> 
+    | DoUntil(body,e) -> 
       
       let rec loop store1 =
                 //求值 循环条件,注意变更环境 store
@@ -269,6 +268,8 @@ and eval e locEnv gloEnv store : int * store =
       let (i1, store1) = eval e1 locEnv gloEnv store
       let res =
           match ope with
+          | "++"     -> i1+1
+          | "--"     -> i1-1
           | "!"      -> if i1=0 then 1 else 0
           | "printi" -> (printf "%d " i1; i1)
           | "printc" -> (printf "%c" (char i1); i1)

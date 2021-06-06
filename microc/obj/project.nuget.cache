@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "9k7Btigh2KUQayzL2zPxYFApvFE6KsdKhOf18TYCPhji2u0/m3qYSIuwwKvseZ3f6n9UVyyXIfRrL7ZMvNW2+g==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\asus\\Desktop\\class\\lec\\dzy\\microc\\interpc.fsproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\asus\\.nuget\\packages\\fsharp.core\\5.0.0\\fsharp.core.5.0.0.nupkg.sha512",
+    "C:\\Users\\asus\\.nuget\\packages\\fslexyacc\\10.2.0\\fslexyacc.10.2.0.nupkg.sha512",
+    "C:\\Users\\asus\\.nuget\\packages\\fslexyacc.runtime\\10.2.0\\fslexyacc.runtime.10.2.0.nupkg.sha512"
+  ],
+  "logs": []
+}

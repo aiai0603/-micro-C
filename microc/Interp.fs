@@ -238,8 +238,34 @@ let rec exec stmt (locEnv : locEnv) (gloEnv : gloEnv) (store : store) : store =
               if v<>0 then loop (exec body locEnv gloEnv store2)
                       else store2  //退出循环返回 环境store2
       loop (exec body locEnv gloEnv store)
+    | Switch(e,body) ->  
+              let (res, store1) = eval e locEnv gloEnv store
+              let rec choose list =
+                match list with
+                | Case(e1,body1) :: tail -> 
+                    let (res2, store2) = eval e1 locEnv gloEnv store1
+                    if res2=res then exec body1 locEnv gloEnv store2
+                                else choose tail
+                | [] -> store1
+                | Default( body1 ) :: tail -> 
+                    exec body1 locEnv gloEnv store1
+                    choose tail
+              (choose body)
+    | Case(e,body) -> exec body locEnv gloEnv store
+    | Match(e,body) ->  
+              let (res, store1) = eval e locEnv gloEnv store
+              let rec choose list =
+                match list with
+                |Pattern(e1,body1) :: tail -> 
+                    let (res2, store2) = eval e1 locEnv gloEnv store1
+                    if res2=res  then exec body1 locEnv gloEnv store2
+                                else choose tail
+                | [] -> store1
+               
+              (choose body)
+    | Pattern(e,body) -> exec body locEnv gloEnv store
     | DoUntil(body,e) -> 
-      
+
       let rec loop store1 =
                 //求值 循环条件,注意变更环境 store
               let (v, store2) = eval e locEnv gloEnv store1
@@ -268,8 +294,8 @@ and eval e locEnv gloEnv store : int * store =
       let (i1, store1) = eval e1 locEnv gloEnv store
       let res =
           match ope with
-          | "++"     -> i1+1
-          | "--"     -> i1-1
+          | "++"     -> failwith ("ready to do " + ope)
+          | "--"     -> failwith ("ready to do " + ope)
           | "!"      -> if i1=0 then 1 else 0
           | "printi" -> (printf "%d " i1; i1)
           | "printc" -> (printf "%c" (char i1); i1)

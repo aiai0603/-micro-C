@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\asus\\Desktop\\class\\lec\\dzy\\microc\\machine.csproj": {}
+    "D:\\git\\-micro-C\\microc\\machine.csproj": {}
   },
   "projects": {
-    "C:\\Users\\asus\\Desktop\\class\\lec\\dzy\\microc\\machine.csproj": {
+    "D:\\git\\-micro-C\\microc\\machine.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\asus\\Desktop\\class\\lec\\dzy\\microc\\machine.csproj",
+        "projectUniqueName": "D:\\git\\-micro-C\\microc\\machine.csproj",
         "projectName": "machine",
-        "projectPath": "C:\\Users\\asus\\Desktop\\class\\lec\\dzy\\microc\\machine.csproj",
+        "projectPath": "D:\\git\\-micro-C\\microc\\machine.csproj",
         "packagesPath": "C:\\Users\\asus\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\asus\\Desktop\\class\\lec\\dzy\\microc\\obj\\",
+        "outputPath": "D:\\git\\-micro-C\\microc\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

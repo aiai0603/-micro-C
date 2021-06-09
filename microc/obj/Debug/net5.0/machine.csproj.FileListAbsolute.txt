@@ -30,3 +30,11 @@ C:\Users\asus\Desktop\class\lec\dzy\microc\obj\Debug\net5.0\machine.dll
 C:\Users\asus\Desktop\class\lec\dzy\microc\obj\Debug\net5.0\ref\machine.dll
 C:\Users\asus\Desktop\class\lec\dzy\microc\obj\Debug\net5.0\machine.pdb
 C:\Users\asus\Desktop\class\lec\dzy\microc\obj\Debug\net5.0\machine.genruntimeconfig.cache
+D:\git\-micro-C\microc\obj\Debug\net5.0\machine.csprojAssemblyReference.cache
+D:\git\-micro-C\microc\obj\Debug\net5.0\machine.GeneratedMSBuildEditorConfig.editorconfig
+D:\git\-micro-C\microc\obj\Debug\net5.0\machine.AssemblyInfoInputs.cache
+D:\git\-micro-C\microc\obj\Debug\net5.0\machine.AssemblyInfo.cs
+D:\git\-micro-C\microc\obj\Debug\net5.0\machine.csproj.CoreCompileInputs.cache
+D:\git\-micro-C\microc\obj\Debug\net5.0\machine.dll
+D:\git\-micro-C\microc\obj\Debug\net5.0\ref\machine.dll
+D:\git\-micro-C\microc\obj\Debug\net5.0\machine.pdb

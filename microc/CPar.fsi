@@ -15,6 +15,8 @@ type token =
   | COLON
   | DEAL
   | MATCHS
+  | ALL
+  | QUE
   | NOT
   | SEQOR
   | SEQAND
@@ -70,6 +72,8 @@ type tokenId =
     | TOKEN_COLON
     | TOKEN_DEAL
     | TOKEN_MATCHS
+    | TOKEN_ALL
+    | TOKEN_QUE
     | TOKEN_NOT
     | TOKEN_SEQOR
     | TOKEN_SEQAND

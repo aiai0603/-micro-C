@@ -20,21 +20,22 @@ let nl = CstI 10 //  \n 的 ASCII 码
 %token PLUS MINUS TIMES DIV MOD INC DEC
 %token EQ NE GT LT GE LE
 %token NOT SEQOR SEQAND 
-%token LPAR RPAR LBRACE RBRACE LBRACK RBRACK SEMI COMMA ASSIGN AMP COLON DEAL MATCHS
+%token LPAR RPAR LBRACE RBRACE LBRACK RBRACK SEMI COMMA ASSIGN AMP COLON DEAL MATCHS ALL QUE
 %token EOF
 
 
 %right ASSIGN             /* lowest precedence */  // 最下面的优先级最高
 %nonassoc PRINT
+%right QUE COLON
 %left SEQOR
 %left SEQAND
 %left EQ NE 
 %nonassoc GT LT GE LE
 %left PLUS MINUS
 %left TIMES DIV MOD 
-%right INC DEC
-%nonassoc NOT AMP 
-%nonassoc LBRACK          /* highest precedence  */
+%right INC DEC 
+%nonassoc NOT AMP
+%nonassoc LBRACK     /* highest precedence  */
 
 %start Main            // 语法开始符号
 %type <Absyn.program> Main   // 开始符号，对应抽象语法树节点类型, program
@@ -135,7 +136,7 @@ StmtM:  /* No unbalanced if-else */
   | RETURN Expr SEMI                    { Return(Some($2))  }
   | Block                               { $1                }
   | SWITCH LPAR Expr RPAR LBRACE StmtCase RBRACE        { Switch($3,$6)  }
-  | MATCH Expr WITH StmtPattern     { Match($2,$4)      }   
+  | MATCH Expr WITH StmtPattern         { Match($2,$4)      }  
   | IF LPAR Expr RPAR StmtM ELSE StmtM  { If($3, $5, $7)    }
   | WHILE LPAR Expr RPAR StmtM          { While($3, $5)     }
   | DO StmtM WHILE LPAR Expr RPAR SEMI  { DoWhile($2, $5)   }
@@ -147,7 +148,6 @@ StmtU:
     IF LPAR Expr RPAR StmtM ELSE StmtU  { If($3, $5, $7)       }
   | IF LPAR Expr RPAR Stmt              { If($3, $5, Block []) }
   | WHILE LPAR Expr RPAR StmtU          { While($3, $5)        }
- 
 ;
 
 Expr: 
@@ -162,6 +162,7 @@ ExprNotAccess:
   | INC Expr                            { Prim1("++", $2)     }
   | Expr INC                            { Prim1("++", $1)     }
   | DEC Expr                            { Prim1("--", $2)     }
+  | Expr QUE Expr COLON Expr            { Prim3($1,$3,$5)     }
   | Expr DEC                            { Prim1("--", $1)     }
   | NOT Expr                            { Prim1("!", $2)      }
   | PRINT Expr                          { Prim1("printi", $2) }
@@ -212,12 +213,13 @@ Exprs1:
 
 StmtCase:
     CASE AtExprNotAccess COLON StmtM               { [Case($2,$4)]    }  
-  | DEFAULT COLON StmtM            { [Default($3)] }
+  | DEFAULT COLON StmtM                            { [Default($3)]    }
   | CASE AtExprNotAccess COLON StmtM StmtCase      { Case($2,$4) :: $5}
 ;
 
 StmtPattern:
     MATCHS AtExprNotAccess DEAL StmtM               { [Pattern($2,$4)]    }  
+  | MATCHS ALL DEAL StmtM                           { [MatchAll($4)] }
   | MATCHS AtExprNotAccess DEAL StmtM StmtPattern   { Pattern($2,$4) :: $5}
 ;
 

@@ -11,13 +11,19 @@ type typ =
   | TypI                             (* Type int                    *)
   | TypC                             (* Type char                   *)
   | TypA of typ * int option         (* Array type                  *)
+  | TypS                             (* Type string                *)
   | TypP of typ                      (* Pointer type                *)
                                                                    
-and expr =                                                         
+and expr =    
+  | CstI of int   (*constant int*)
+  | ConstString of string (*constant string*)
+  | ConstChar of char (*constant char*) 
+  | ConstNull of int (*default 0*)                                                     
   | Access of access                 (* x    or  *p    or  a[e]     *)
   | Assign of access * expr          (* x=e  or  *p=e  or  a[e]=e   *)
+  | Inc of  access 
+  | Decr of  access
   | Addr of access                   (* &x   or  &*p   or  &a[e]    *)
-  | CstI of int                      (* Constant                    *)
   | Prim1 of string * expr           (* Unary primitive operator    *)
   | Prim2 of string * expr * expr    (* Binary primitive operator   *)
   | Prim3 of expr * expr * expr      
@@ -39,6 +45,7 @@ and stmt =
   | Return of expr option            (* Return from method          *)
   | Block of stmtordec list          (* Block: grouping and scope   *)
   | For of expr * expr  * expr * stmt
+  | Forin of expr * expr * stmt
   | DoUntil of stmt * expr
   | Switch of expr * stmt list
   | Case of expr * stmt 

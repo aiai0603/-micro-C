@@ -32,7 +32,7 @@ type token =
   | DIV
   | MOD
   | INC
-  | DEC
+  | DECR
   | CHAR
   | ELSE
   | IF
@@ -53,6 +53,8 @@ type token =
   | MATCH
   | WITH
   | DEFAULT
+  | STRING
+  | CSTCHAR of (char)
   | CSTSTRING of (string)
   | NAME of (string)
   | CSTINT of (int)
@@ -89,7 +91,7 @@ type tokenId =
     | TOKEN_DIV
     | TOKEN_MOD
     | TOKEN_INC
-    | TOKEN_DEC
+    | TOKEN_DECR
     | TOKEN_CHAR
     | TOKEN_ELSE
     | TOKEN_IF
@@ -110,6 +112,8 @@ type tokenId =
     | TOKEN_MATCH
     | TOKEN_WITH
     | TOKEN_DEFAULT
+    | TOKEN_STRING
+    | TOKEN_CSTCHAR
     | TOKEN_CSTSTRING
     | TOKEN_NAME
     | TOKEN_CSTINT
@@ -140,6 +144,8 @@ type nonTerminalId =
     | NONTERM_StmtCase
     | NONTERM_StmtPattern
     | NONTERM_Const
+    | NONTERM_ConstString
+    | NONTERM_ConstChar
     | NONTERM_Type
 /// This function maps tokens to integer indexes
 val tagOfToken: token -> int

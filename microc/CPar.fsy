@@ -15,9 +15,10 @@ let nl = CstI 10 //  \n 的 ASCII 码
 
 %token <int> CSTINT CSTBOOL  // <int> 是词元的语义值类型
 %token <string> CSTSTRING NAME
+%token <char> CSTCHAR
 
-%token CHAR ELSE IF INT NULL PRINT PRINTLN RETURN VOID WHILE FOR DOWHILE DO UNTIL DOUNTIL SWITCH CASE MATCH WITH DEFAULT
-%token PLUS MINUS TIMES DIV MOD INC DEC
+%token CHAR ELSE IF INT NULL PRINT PRINTLN RETURN VOID WHILE FOR DOWHILE DO UNTIL DOUNTIL SWITCH CASE MATCH WITH DEFAULT STRING
+%token PLUS MINUS TIMES DIV MOD INC DECR
 %token EQ NE GT LT GE LE
 %token NOT SEQOR SEQAND 
 %token LPAR RPAR LBRACE RBRACE LBRACK RBRACK SEMI COMMA ASSIGN AMP COLON DEAL MATCHS ALL QUE
@@ -33,7 +34,7 @@ let nl = CstI 10 //  \n 的 ASCII 码
 %nonassoc GT LT GE LE
 %left PLUS MINUS
 %left TIMES DIV MOD 
-%right INC DEC 
+%right INC DECR 
 %nonassoc NOT AMP
 %nonassoc LBRACK     /* highest precedence  */
 
@@ -159,12 +160,11 @@ ExprNotAccess:
     AtExprNotAccess                     { $1                  }
   | Access ASSIGN Expr                  { Assign($1, $3)      }
   | NAME LPAR Exprs RPAR                { Call($1, $3)        }  
-  | INC Expr                            { Prim1("++", $2)     }
-  | Expr INC                            { Prim1("++", $1)     }
-  | DEC Expr                            { Prim1("--", $2)     }
-  | Expr DEC                            { Prim1("--", $1)     }
+  | INC Access                          { Inc($2)             }
+  | Access INC                          { Inc($1)             }
+  | DECR Access                         { Decr($2)             }
+  | Access DECR                         { Decr($1)             }
   | Expr QUE Expr COLON Expr            { Prim3($1,$3,$5)     }
-  | Expr DEC                            { Prim1("--", $1)     }
   | NOT Expr                            { Prim1("!", $2)      }
   | PRINT Expr                          { Prim1("printi", $2) }
   | PRINTLN                             { Prim1("printc", nl) }
@@ -189,6 +189,8 @@ AtExprNotAccess:
     // AMP Access  , &x
     // (3)   
     Const                               { CstI $1             }
+  | ConstString                         { ConstString($1)     }
+  | ConstChar                           { ConstChar($1)       }
   | LPAR ExprNotAccess RPAR             { $2                  } 
   | AMP Access                          { Addr $2             }
 ;
@@ -233,7 +235,17 @@ Const:
   | NULL                                { -1       }
 ;
 
+ConstString:
+  CSTSTRING                             { $1       }
+;
+
+
+ConstChar:
+  CSTCHAR                               { $1       }
+;
+
 Type:
     INT                                 { TypI     }
   | CHAR                                { TypC     }
+  | STRING                              { TypS     }
 ;

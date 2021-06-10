@@ -22,6 +22,7 @@ let keyword s =
     | "false"   -> CSTBOOL 0
     | "if"      -> IF
     | "int"     -> INT
+    | "string"  -> STRING
     | "null"    -> NULL
     | "print"   -> PRINT
     | "println" -> PRINTLN
@@ -76,7 +77,7 @@ rule Token = parse          // 每个 规则rule 会生成为一个函数，函�
                               // 此时lexbuf是 匹配 '+'完成后，后续的内容 
   | "++"            { INC }
   | "?"             { QUE }
-  | "--"            { DEC }
+  | "--"            { DECR }
   | '-'             { MINUS } 
   | '*'             { TIMES } 
   | '/'             { DIV } 

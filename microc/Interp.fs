@@ -32,8 +32,6 @@ open Debug
 (* ------------------------------------------------------------------- *)
 
 
-
-
 (* Simple environment operations *)
 // 多态类型 env 
 // 环境env 是 元组 ("name",data)的列表 
@@ -292,21 +290,28 @@ and stmtordec stmtordec locEnv gloEnv store =
 
 (* Evaluating micro-C expressions *)
 
-and eval e locEnv gloEnv store : int * store = 
+and eval e locEnv gloEnv store : 'a * store = 
     match e with
     | Access acc     -> let (loc, store1) = access acc locEnv gloEnv store
                         (getSto store1 loc, store1) 
+    | Inc(acc)       -> let (loc, store1) = access acc locEnv gloEnv store
+                        let (res) = getSto store1 loc
+                        (res+1, setSto store1 loc (res+1)) 
+    | Decr(acc)      -> let (loc, store1) = access acc locEnv gloEnv store
+                        let (res) = getSto store1 loc
+                        (res-1, setSto store1 loc (res-1)) 
     | Assign(acc, e) -> let (loc, store1) = access acc locEnv gloEnv store
                         let (res, store2) = eval e locEnv gloEnv store1
                         (res, setSto store2 loc res) 
-    | CstI i         -> (i, store)
+    | CstI i     -> (i, store)
+    | ConstNull i    -> (i ,store)
+    | ConstString  s -> (0 ,store)
+    | ConstChar c    -> ((int c), store)
     | Addr acc       -> access acc locEnv gloEnv store
     | Prim1(ope, e1) ->
       let (i1, store1) = eval e1 locEnv gloEnv store
       let res =
           match ope with
-          | "++"     -> failwith ("ready to do " + ope)
-          | "--"     -> failwith ("ready to do " + ope)
           | "!"      -> if i1=0 then 1 else 0
           | "printi" -> (printf "%d " i1; i1)
           | "printc" -> (printf "%c" (char i1); i1)

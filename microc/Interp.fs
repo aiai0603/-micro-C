@@ -229,7 +229,16 @@ let rec exec stmt (locEnv : locEnv) (gloEnv : gloEnv) (store : store) : store =
       
       loop stmts (locEnv, store) 
     | Return _ -> failwith "return not implemented"  // 解释器没有实现 return
-    | For(dec,e,start,body) -> failwith "for not implemented" 
+    | For(e1,e2,e3,body) -> 
+          let (res ,store0) = eval e1 locEnv gloEnv store
+          let rec loop store1 =
+                //求值 循环条件,注意变更环境 store
+              let (v, store2) = eval e2 locEnv gloEnv store1
+                // 继续循环
+              if v<>0 then  let (reend ,store3) = eval e3 locEnv gloEnv (exec body locEnv gloEnv store2)
+                            loop store3
+                      else store2  
+          loop store0
     | DoWhile(body,e) -> 
       let rec loop store1 =
                 //求值 循环条件,注意变更环境 store
@@ -268,7 +277,6 @@ let rec exec stmt (locEnv : locEnv) (gloEnv : gloEnv) (store : store) : store =
     | Pattern(e,body) -> exec body locEnv gloEnv store
     | MatchAll (body )->  exec body locEnv gloEnv store
     | DoUntil(body,e) -> 
-
       let rec loop store1 =
                 //求值 循环条件,注意变更环境 store
               let (v, store2) = eval e locEnv gloEnv store1

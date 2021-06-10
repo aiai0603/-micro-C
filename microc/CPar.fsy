@@ -162,6 +162,7 @@ ExprNotAccess:
   | INC Expr                            { Prim1("++", $2)     }
   | Expr INC                            { Prim1("++", $1)     }
   | DEC Expr                            { Prim1("--", $2)     }
+  | Expr DEC                            { Prim1("--", $1)     }
   | Expr QUE Expr COLON Expr            { Prim3($1,$3,$5)     }
   | Expr DEC                            { Prim1("--", $1)     }
   | NOT Expr                            { Prim1("!", $2)      }

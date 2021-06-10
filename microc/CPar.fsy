@@ -17,7 +17,7 @@ let nl = CstI 10 //  \n 的 ASCII 码
 %token <string> CSTSTRING NAME
 %token <char> CSTCHAR
 
-%token CHAR ELSE IF INT NULL PRINT PRINTLN RETURN VOID WHILE FOR DOWHILE DO UNTIL DOUNTIL SWITCH CASE MATCH WITH DEFAULT STRING
+%token CHAR ELSE IF INT NULL PRINT RETURN VOID WHILE FOR DOWHILE DO UNTIL DOUNTIL SWITCH CASE MATCH WITH DEFAULT STRING
 %token PLUS MINUS TIMES DIV MOD INC DECR
 %token EQ NE GT LT GE LE
 %token NOT SEQOR SEQAND 
@@ -162,12 +162,11 @@ ExprNotAccess:
   | NAME LPAR Exprs RPAR                { Call($1, $3)        }  
   | INC Access                          { Inc($2)             }
   | Access INC                          { Inc($1)             }
-  | DECR Access                         { Decr($2)             }
-  | Access DECR                         { Decr($1)             }
+  | DECR Access                         { Decr($2)            }
+  | Access DECR                         { Decr($1)            }
   | Expr QUE Expr COLON Expr            { Prim3($1,$3,$5)     }
+  | PRINT LPAR CSTSTRING COMMA Expr RPAR{ Print($3, $5)       }
   | NOT Expr                            { Prim1("!", $2)      }
-  | PRINT Expr                          { Prim1("printi", $2) }
-  | PRINTLN                             { Prim1("printc", nl) }
   | Expr PLUS  Expr                     { Prim2("+",  $1, $3) }
   | Expr MINUS Expr                     { Prim2("-",  $1, $3) }
   | Expr TIMES Expr                     { Prim2("*",  $1, $3) }

@@ -22,6 +22,7 @@ and expr =
   | Access of access                 (* x    or  *p    or  a[e]     *)
   | Assign of access * expr          (* x=e  or  *p=e  or  a[e]=e   *)
   | Inc of  access 
+  | Print of string * expr
   | Decr of  access
   | Addr of access                   (* &x   or  &*p   or  &a[e]    *)
   | Prim1 of string * expr           (* Unary primitive operator    *)

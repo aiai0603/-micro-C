@@ -291,6 +291,7 @@ and stmtordec stmtordec locEnv gloEnv store =
 (* Evaluating micro-C expressions *)
 
 and eval e locEnv gloEnv store : 'a * store = 
+
     match e with
     | Access acc     -> let (loc, store1) = access acc locEnv gloEnv store
                         (getSto store1 loc, store1) 
@@ -303,18 +304,23 @@ and eval e locEnv gloEnv store : 'a * store =
     | Assign(acc, e) -> let (loc, store1) = access acc locEnv gloEnv store
                         let (res, store2) = eval e locEnv gloEnv store1
                         (res, setSto store2 loc res) 
-    | CstI i     -> (i, store)
+    | CstI i         -> (i, store)
     | ConstNull i    -> (i ,store)
-    | ConstString  s -> (0 ,store)
+  // | ConstString  s -> (0 ,store)
     | ConstChar c    -> ((int c), store)
     | Addr acc       -> access acc locEnv gloEnv store
+    | Print(op,e1)   -> let (i1, store1) = eval e1 locEnv gloEnv store
+                        let res = 
+                          match op with
+                          | "%c"   -> (printf "%c " (char i1); i1)
+                          | "%d"   -> (printf "%d " i1; i1)  
+                        (res, store1) 
+                        
     | Prim1(ope, e1) ->
       let (i1, store1) = eval e1 locEnv gloEnv store
       let res =
           match ope with
           | "!"      -> if i1=0 then 1 else 0
-          | "printi" -> (printf "%d " i1; i1)
-          | "printc" -> (printf "%c" (char i1); i1)
           | _        -> failwith ("unknown primitive " + ope)
       (res, store1) 
     | Prim2(ope, e1, e2) ->
@@ -348,6 +354,7 @@ and eval e locEnv gloEnv store : 'a * store =
       let (i1, store1) as res = eval e1 locEnv gloEnv store
       if i1<>0 then res else eval e2 locEnv gloEnv store1
     | Call(f, es) -> callfun f es locEnv gloEnv store 
+
 
 and access acc locEnv gloEnv store : int * store = 
     match acc with 

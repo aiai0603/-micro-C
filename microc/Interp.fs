@@ -152,10 +152,10 @@ let rec bindVars xs vs locEnv store : locEnv * store =
 let rec allocate (typ, x) (env0, nextloc) sto0 : locEnv * store = 
     let (nextloc1, v, sto1) =
         match typ with
-
         //数组 调用initSto 分配 i 个空间
         | TypA (t, Some i) -> (nextloc+i, nextloc, initSto nextloc i sto0)
         // 默认值是 -1
+        | TypS  -> (nextloc+128, nextloc, initSto nextloc 128 sto0)
         | _ -> (nextloc, -1, sto0)
     bindVar x v (env0, nextloc1) sto1
 
@@ -209,14 +209,12 @@ let rec exec stmt (locEnv : locEnv) (gloEnv : gloEnv) (store : store) : store =
               if v<>0 then loop (exec body locEnv gloEnv store2)
                       else store2  //退出循环返回 环境store2
       loop store
-
     | Expr e ->
       // _ 表示丢弃e的值,返回 变更后的环境store1 
       let (_, store1) = eval e locEnv gloEnv store 
       store1 
 
     | Block stmts -> 
-
         // 语句块 解释辅助函数 loop
       let rec loop ss (locEnv, store) = 
           match ss with 
@@ -224,7 +222,6 @@ let rec exec stmt (locEnv : locEnv) (gloEnv : gloEnv) (store : store) : store =
                              //语句块,解释 第1条语句s1
                             // 调用loop 用变更后的环境 解释后面的语句 sr.
           | s1::sr -> loop sr (stmtordec s1 locEnv gloEnv store)
-      
       loop stmts (locEnv, store) 
     | Return _ -> failwith "return not implemented"  // 解释器没有实现 return
     | For(e1,e2,e3,body) -> 
@@ -295,27 +292,46 @@ and eval e locEnv gloEnv store : 'a * store =
     match e with
     | Access acc     -> let (loc, store1) = access acc locEnv gloEnv store
                         (getSto store1 loc, store1) 
-    | Inc(acc)       -> let (loc, store1) = access acc locEnv gloEnv store
-                        let (res) = getSto store1 loc
-                        (res+1, setSto store1 loc (res+1)) 
-    | Decr(acc)      -> let (loc, store1) = access acc locEnv gloEnv store
-                        let (res) = getSto store1 loc
-                        (res-1, setSto store1 loc (res-1)) 
+    | Self(acc,opt,e)-> let (loc, store1) = access acc locEnv gloEnv store
+                        let (i1) = getSto store1 loc
+                        let (i2, store2) = eval e locEnv gloEnv store
+                        let res =
+                          match opt with
+                          | "*"  -> i1 * i2
+                          | "+"  -> i1 + i2
+                          | "-"  -> i1 - i2
+                          | "/"  -> i1 / i2
+                          | "%"  -> i1 % i2
+                          | _    -> failwith ("unknown primitive " + opt)
+                        (res, setSto store2 loc res) 
     | Assign(acc, e) -> let (loc, store1) = access acc locEnv gloEnv store
-                        let (res, store2) = eval e locEnv gloEnv store1
+                        let (res,store2)= 
+                          match e with
+                          | ConstString s -> let rec sign index stores=
+                                                if index<s.Length then
+                                                  sign (index+1) ( setSto stores (loc-index-1) (int (s.Chars(index) ) ) )
+                                                else stores  
+                                             ( s.Length   ,sign 0 store1)
+                          | _ ->  eval e locEnv gloEnv store1
                         (res, setSto store2 loc res) 
     | CstI i         -> (i, store)
     | ConstNull i    -> (i ,store)
-  // | ConstString  s -> (0 ,store)
+    | ConstString s  -> (s.Length,store)
     | ConstChar c    -> ((int c), store)
     | Addr acc       -> access acc locEnv gloEnv store
+    | Println(acc)   -> let (loc, store1) = access acc locEnv gloEnv store
+                        let (i1) = getSto store1 loc
+                        for i= 0 to i1-1 do
+                            let i2 = getSto store1 (loc-i-1)
+                            (printf "%c" (char i2))
+                        (printf "\n" )
+                        (i1,store1)
     | Print(op,e1)   -> let (i1, store1) = eval e1 locEnv gloEnv store
                         let res = 
                           match op with
                           | "%c"   -> (printf "%c " (char i1); i1)
                           | "%d"   -> (printf "%d " i1; i1)  
-                        (res, store1) 
-                        
+                        (res, store1)         
     | Prim1(ope, e1) ->
       let (i1, store1) = eval e1 locEnv gloEnv store
       let res =

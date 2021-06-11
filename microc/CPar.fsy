@@ -17,7 +17,7 @@ let nl = CstI 10 //  \n 的 ASCII 码
 %token <string> CSTSTRING NAME
 %token <char> CSTCHAR
 
-%token CHAR ELSE IF INT NULL PRINT RETURN VOID WHILE FOR DOWHILE DO UNTIL DOUNTIL SWITCH CASE MATCH WITH DEFAULT STRING
+%token CHAR ELSE IF INT NULL PRINT RETURN VOID WHILE FOR DOWHILE DO UNTIL DOUNTIL SWITCH CASE MATCH WITH DEFAULT STRING STRUCT PRINTLN
 %token PLUS MINUS TIMES DIV MOD INC DECR
 %token EQ NE GT LT GE LE
 %token NOT SEQOR SEQAND 
@@ -26,7 +26,7 @@ let nl = CstI 10 //  \n 的 ASCII 码
 
 
 %right ASSIGN             /* lowest precedence */  // 最下面的优先级最高
-%nonassoc PRINT
+%nonassoc PRINT PRINTLN
 %right QUE COLON
 %left SEQOR
 %left SEQAND
@@ -80,6 +80,21 @@ Vardec:
  变量描述
 NAME  "n"   (fun t->t, "n") 返回一个元组，第一个元素，是类型构造函数，在Vardec 规则中使用
 */ 
+
+
+//结构体
+StructDec:
+  | STRUCT NAME LBRACE MemberList RBRACE         { ($2, $4) }
+;
+
+
+MemberList:
+    /* empty */ { [] }
+    | Vardec SEMI MemberList { $1 :: $3 }
+;
+
+
+
 
 // 变量描述
 Vardesc:                         
@@ -160,12 +175,18 @@ ExprNotAccess:
     AtExprNotAccess                     { $1                  }
   | Access ASSIGN Expr                  { Assign($1, $3)      }
   | NAME LPAR Exprs RPAR                { Call($1, $3)        }  
-  | INC Access                          { Inc($2)             }
-  | Access INC                          { Inc($1)             }
-  | DECR Access                         { Decr($2)            }
-  | Access DECR                         { Decr($1)            }
+  | INC Access                          { Self($2,"+",CstI 1) }
+  | Access INC                          { Self($1,"+",CstI 1) }
+  | DECR Access                         { Self($2,"-",CstI 1) }
+  | Access DECR                         { Self($1,"-",CstI 1) }
+  | Access PLUS ASSIGN Expr             { Self($1,"+",$4)     }
+  | Access MINUS ASSIGN Expr            { Self($1,"-",$4)     }
+  | Access TIMES ASSIGN Expr            { Self($1,"*",$4)     }
+  | Access DIV ASSIGN Expr              { Self($1,"/",$4)     }
+  | Access MOD ASSIGN Expr              { Self($1,"%",$4)     }
   | Expr QUE Expr COLON Expr            { Prim3($1,$3,$5)     }
   | PRINT LPAR CSTSTRING COMMA Expr RPAR{ Print($3, $5)       }
+  | PRINTLN LPAR  Access RPAR           { Println($3)         }
   | NOT Expr                            { Prim1("!", $2)      }
   | Expr PLUS  Expr                     { Prim2("+",  $1, $3) }
   | Expr MINUS Expr                     { Prim2("-",  $1, $3) }
@@ -247,4 +268,5 @@ Type:
     INT                                 { TypI     }
   | CHAR                                { TypC     }
   | STRING                              { TypS     }
+  | STRUCT  NAME                        { TypeStruct($2) }
 ;

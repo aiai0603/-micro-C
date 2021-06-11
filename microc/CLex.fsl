@@ -39,6 +39,8 @@ let keyword s =
     | "switch"  -> SWITCH
     | "case"    -> CASE
     | "default" -> DEFAULT
+    | "struct"  -> STRUCT
+    | "println"   -> PRINTLN
     | _         -> NAME s   // 缺省情况，是标识符的名字，如 函数名，变量名等
                             // 当所有的关键字没有匹配成功时，则当成标识符
 // 字符串转义符处理函数
@@ -148,4 +150,4 @@ and String chars = parse
   | ['\000'-'\031' '\127' '\255']    
       { failwith "Lexer error: invalid character in string" }  // 字符串中出现 ASCII 控制字符
   | _
-      { String (char (lexbuf.LexemeChar 0) :: chars) lexbuf } // 将读到的第1个字符加到临时的chars数组
+      { String (char (lexbuf.LexemeChar 0) :: chars) lexbuf }  // 将读到的第1个字符加到临时的chars数组

@@ -53,6 +53,8 @@ type token =
   | WITH
   | DEFAULT
   | STRING
+  | STRUCT
+  | PRINTLN
   | CSTCHAR of (char)
   | CSTSTRING of (string)
   | NAME of (string)
@@ -111,6 +113,8 @@ type tokenId =
     | TOKEN_WITH
     | TOKEN_DEFAULT
     | TOKEN_STRING
+    | TOKEN_STRUCT
+    | TOKEN_PRINTLN
     | TOKEN_CSTCHAR
     | TOKEN_CSTSTRING
     | TOKEN_NAME
@@ -124,6 +128,8 @@ type nonTerminalId =
     | NONTERM_Topdecs
     | NONTERM_Topdec
     | NONTERM_Vardec
+    | NONTERM_StructDec
+    | NONTERM_MemberList
     | NONTERM_Vardesc
     | NONTERM_Fundec
     | NONTERM_Paramdecs

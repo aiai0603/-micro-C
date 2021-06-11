@@ -13,6 +13,7 @@ type typ =
   | TypA of typ * int option         (* Array type                  *)
   | TypS                             (* Type string                *)
   | TypP of typ                      (* Pointer type                *)
+  | TypeStruct of string
                                                                    
 and expr =    
   | CstI of int   (*constant int*)
@@ -21,9 +22,9 @@ and expr =
   | ConstNull of int (*default 0*)                                                     
   | Access of access                 (* x    or  *p    or  a[e]     *)
   | Assign of access * expr          (* x=e  or  *p=e  or  a[e]=e   *)
-  | Inc of  access 
+  | Self of  access * string * expr
   | Print of string * expr
-  | Decr of  access
+  | Println of access
   | Addr of access                   (* &x   or  &*p   or  &a[e]    *)
   | Prim1 of string * expr           (* Unary primitive operator    *)
   | Prim2 of string * expr * expr    (* Binary primitive operator   *)
@@ -63,6 +64,9 @@ and stmtordec =
 and topdec = 
   | Fundec of typ option * string * (typ * string) list * stmt
   | Vardec of typ * string
+  | Structdec of  string * (typ * string) list 
 
 and program = 
   | Prog of topdec list
+
+

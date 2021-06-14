@@ -1,4 +1,4 @@
-void main(int n) {
+Void main(Int n) {
   
 
     switch( n ){

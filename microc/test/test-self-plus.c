@@ -1,6 +1,6 @@
-void main(int n) {
+Void main(Int n) {
   
-    int a;
+    Int a;
     a=10;
     a+=n;
     print("%d",a);

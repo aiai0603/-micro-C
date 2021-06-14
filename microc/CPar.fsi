@@ -33,6 +33,11 @@ type token =
   | MOD
   | INC
   | DECR
+  | SELFPLUS
+  | SELFMINUS
+  | SELFTIMES
+  | SELFDIV
+  | SELFMOD
   | CHAR
   | ELSE
   | IF
@@ -55,6 +60,9 @@ type token =
   | STRING
   | STRUCT
   | PRINTLN
+  | CREATEI
+  | BREAK
+  | CONTINUE
   | CSTCHAR of (char)
   | CSTSTRING of (string)
   | NAME of (string)
@@ -93,6 +101,11 @@ type tokenId =
     | TOKEN_MOD
     | TOKEN_INC
     | TOKEN_DECR
+    | TOKEN_SELFPLUS
+    | TOKEN_SELFMINUS
+    | TOKEN_SELFTIMES
+    | TOKEN_SELFDIV
+    | TOKEN_SELFMOD
     | TOKEN_CHAR
     | TOKEN_ELSE
     | TOKEN_IF
@@ -115,6 +128,9 @@ type tokenId =
     | TOKEN_STRING
     | TOKEN_STRUCT
     | TOKEN_PRINTLN
+    | TOKEN_CREATEI
+    | TOKEN_BREAK
+    | TOKEN_CONTINUE
     | TOKEN_CSTCHAR
     | TOKEN_CSTSTRING
     | TOKEN_NAME

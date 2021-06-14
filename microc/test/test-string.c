@@ -1,19 +1,19 @@
-void main(int n) {
+Void main(Int n) {
   
-    string a;
+    String a;
 
     a="test1";
   
     println(a);
    
-    string b;
+    String b;
 
     b="mytest2";
     println(a);
     println(b);
     
 
-    int c;
+    Int c;
     c=12;
     b="mytest2";
     println(a);

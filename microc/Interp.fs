@@ -200,7 +200,6 @@ let rec exec stmt (locEnv : locEnv) (gloEnv : gloEnv) (store : store) : store =
       if v<>0 then exec stmt1 locEnv gloEnv store1 //True分支
               else exec stmt2 locEnv gloEnv store1 //False分支
     | While(e, body) ->
-
       //定义 While循环辅助函数 loop
       let rec loop store1 =
                 //求值 循环条件,注意变更环境 store
@@ -213,7 +212,6 @@ let rec exec stmt (locEnv : locEnv) (gloEnv : gloEnv) (store : store) : store =
       // _ 表示丢弃e的值,返回 变更后的环境store1 
       let (_, store1) = eval e locEnv gloEnv store 
       store1 
-
     | Block stmts -> 
         // 语句块 解释辅助函数 loop
       let rec loop ss (locEnv, store) = 
@@ -256,7 +254,7 @@ let rec exec stmt (locEnv : locEnv) (gloEnv : gloEnv) (store : store) : store =
                     choose tail
               (choose body)
     | Case(e,body) -> exec body locEnv gloEnv store
-    | Match(e,body) ->  
+    | MatchItem(e,body) ->  
               let (res, store1) = eval e locEnv gloEnv store
               let rec choose list =
                 match list with
@@ -279,6 +277,8 @@ let rec exec stmt (locEnv : locEnv) (gloEnv : gloEnv) (store : store) : store =
               if v=0 then loop (exec body locEnv gloEnv store2)
                       else store2  //退出循环返回 环境store2
       loop (exec body locEnv gloEnv store)
+    | Break -> failwith("ready to do")
+    | Continue -> failwith("ready to do")
 
 and stmtordec stmtordec locEnv gloEnv store = 
     match stmtordec with 
@@ -290,6 +290,17 @@ and stmtordec stmtordec locEnv gloEnv store =
 and eval e locEnv gloEnv store : 'a * store = 
 
     match e with
+    | CreateI(s,hex) -> let mutable res = 0;
+                        for i=0 to s.Length-1 do
+                           if s.Chars(i)>='0' && s.Chars(i)<='9' then
+                             res <- res*hex + ( (int (s.Chars(i)))-(int '0') )
+                           elif s.Chars(i)>='a' && s.Chars(i)<='f' then
+                             res <- res*hex + ( (int (s.Chars(i)))-(int 'a')+10 )
+                           elif s.Chars(i)>='A' && s.Chars(i)<='F' then
+                             res <- res*hex + ( (int (s.Chars(i)))-(int 'A')+10 )
+                           else 
+                             failwith("ERROR WORLD IN NUMBER")
+                        (res,store)
     | Access acc     -> let (loc, store1) = access acc locEnv gloEnv store
                         (getSto store1 loc, store1) 
     | Self(acc,opt,e)-> let (loc, store1) = access acc locEnv gloEnv store
@@ -331,7 +342,19 @@ and eval e locEnv gloEnv store : 'a * store =
                           match op with
                           | "%c"   -> (printf "%c " (char i1); i1)
                           | "%d"   -> (printf "%d " i1; i1)  
-                        (res, store1)         
+                        (res, store1)  
+    | PrintHex(hex,e1)->let (i1, store1) = eval e1 locEnv gloEnv store
+                        let mutable temp = i1
+                        let mutable s  = ""
+                        while temp>0 do
+                           if temp%hex>=0 && temp%hex<=9  then
+                              s <-  ( string ( temp % hex ) ) + s;
+                              temp <- temp/hex;
+                           elif  temp%hex>9  then 
+                              s <-  string ( char ((  temp % hex   )+55) ) + s;
+                              temp <- temp/hex;
+                        printf "%s " s ;
+                        (i1, store1)         
     | Prim1(ope, e1) ->
       let (i1, store1) = eval e1 locEnv gloEnv store
       let res =

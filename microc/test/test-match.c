@@ -1,4 +1,4 @@
-void main(int n) {
+Void main(Int n) {
     match n with
     | 2 -> print("%d",n);
     | 3 ->print("%d",n+1);

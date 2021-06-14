@@ -1,8 +1,8 @@
-void main(int n) {
+Void main(Int n) {
   
-    int a[6];
+    Int a[6];
     a[3] = 2;
-    int bb;
+    Int bb;
     bb=1;
 
     print("%d",a[3]);

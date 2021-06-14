@@ -1,6 +1,6 @@
-void main(int n) {
+Void main(Int n) {
   
-    char a;
+    Char a;
     a = '3';
     print("%c",a);
 

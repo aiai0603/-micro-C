@@ -1,9 +1,9 @@
-void main(int n) {
+Void main(Int n) {
   
-    struct test
+    Struct test
     {
-        int a;
-        char b;
+        Int a;
+        Char b;
     } t;
 
     t.a=1;

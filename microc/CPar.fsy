@@ -5,11 +5,32 @@
 	No (real) shift/reduce conflicts thanks to Niels Kokholm.
 *)
 open Absyn
+open System.Text.RegularExpressions
+
+let (|InterpretedMatch|_|) pattern input =
+    if input = null then None
+    else
+        let m = Regex.Match(input, pattern)
+        if m.Success then Some [for x in m.Groups -> x]
+        else None
+
+let (|CompiledMatch|_|) pattern input =
+    if input = null then None
+    else
+        let m = Regex.Match(input, pattern, RegexOptions.Compiled)
+        if m.Success then Some [for x in m.Groups -> x]
+        else None
 
 // Vardesc 返回的是一个 元组 (g,s)
 // g是类型构造函数，s是变量名
+let isCorrect s:string  = 
+    match s with
+    | CompiledMatch @"^__" _ -> failwith("var can not start with __")
+    | _ -> if(s.Chars(0)>='A' && s.Chars(0)<='Z') then failwith("var can not start with uppercase")
+           else s
 
-let compose1 f (g, s) = ((fun x -> g(f(x))), s)
+let compose1 f (g, s:string) = 
+    ((fun x -> g(f(x))), isCorrect s )
 let nl = CstI 10 //  \n 的 ASCII 码
 %}
 
@@ -17,8 +38,8 @@ let nl = CstI 10 //  \n 的 ASCII 码
 %token <string> CSTSTRING NAME
 %token <char> CSTCHAR
 
-%token CHAR ELSE IF INT NULL PRINT RETURN VOID WHILE FOR DOWHILE DO UNTIL DOUNTIL SWITCH CASE MATCH WITH DEFAULT STRING STRUCT PRINTLN
-%token PLUS MINUS TIMES DIV MOD INC DECR
+%token CHAR ELSE IF INT NULL PRINT RETURN VOID WHILE FOR DOWHILE DO UNTIL DOUNTIL SWITCH CASE MATCH WITH DEFAULT STRING STRUCT PRINTLN CREATEI BREAK CONTINUE
+%token PLUS MINUS TIMES DIV MOD INC DECR   SELFPLUS SELFMINUS SELFTIMES SELFDIV SELFMOD
 %token EQ NE GT LT GE LE
 %token NOT SEQOR SEQAND 
 %token LPAR RPAR LBRACE RBRACE LBRACK RBRACK SEMI COMMA ASSIGN AMP COLON DEAL MATCHS ALL QUE
@@ -32,7 +53,7 @@ let nl = CstI 10 //  \n 的 ASCII 码
 %left SEQAND
 %left EQ NE 
 %nonassoc GT LT GE LE
-%left PLUS MINUS
+%left PLUS MINUS SELFPLUS SELFMINUS SELFTIMES SELFDIV SELFMOD
 %left TIMES DIV MOD 
 %right INC DECR 
 %nonassoc NOT AMP
@@ -93,13 +114,10 @@ MemberList:
     | Vardec SEMI MemberList { $1 :: $3 }
 ;
 
-
-
-
 // 变量描述
 Vardesc:                         
     // "i"    标识符
-    NAME                                { ((fun t -> t), $1)                      }
+    NAME                                { ((fun t -> t), isCorrect($1))           }
     // "*p"   指针标识符
     // let compose1 f (g, s) = ((fun x -> g(f(x))), s)
     //             compose1  (fun t -> TypP t) $2 ===  compose1 TypP $2  
@@ -152,12 +170,14 @@ StmtM:  /* No unbalanced if-else */
   | RETURN Expr SEMI                    { Return(Some($2))  }
   | Block                               { $1                }
   | SWITCH LPAR Expr RPAR LBRACE StmtCase RBRACE        { Switch($3,$6)  }
-  | MATCH Expr WITH StmtPattern         { Match($2,$4)      }  
+  | MATCH Expr WITH StmtPattern         { MatchItem($2,$4)      }  
   | IF LPAR Expr RPAR StmtM ELSE StmtM  { If($3, $5, $7)    }
   | WHILE LPAR Expr RPAR StmtM          { While($3, $5)     }
   | DO StmtM WHILE LPAR Expr RPAR SEMI  { DoWhile($2, $5)   }
   | DO StmtM UNTIL LPAR Expr RPAR SEMI  { DoUntil($2, $5)   }
   | FOR LPAR Expr SEMI Expr SEMI Expr RPAR StmtM     { For($3,$5,$7,$9)  }
+  | BREAK SEMI                          { Break             }
+  | CONTINUE SEMI                       { Continue          }
 ;
 
 StmtU:
@@ -173,21 +193,9 @@ Expr:
 
 ExprNotAccess:
     AtExprNotAccess                     { $1                  }
+  | CREATEI LPAR CSTSTRING COMMA CSTINT RPAR {CreateI($3,$5)     }
   | Access ASSIGN Expr                  { Assign($1, $3)      }
   | NAME LPAR Exprs RPAR                { Call($1, $3)        }  
-  | INC Access                          { Self($2,"+",CstI 1) }
-  | Access INC                          { Self($1,"+",CstI 1) }
-  | DECR Access                         { Self($2,"-",CstI 1) }
-  | Access DECR                         { Self($1,"-",CstI 1) }
-  | Access PLUS ASSIGN Expr             { Self($1,"+",$4)     }
-  | Access MINUS ASSIGN Expr            { Self($1,"-",$4)     }
-  | Access TIMES ASSIGN Expr            { Self($1,"*",$4)     }
-  | Access DIV ASSIGN Expr              { Self($1,"/",$4)     }
-  | Access MOD ASSIGN Expr              { Self($1,"%",$4)     }
-  | Expr QUE Expr COLON Expr            { Prim3($1,$3,$5)     }
-  | PRINT LPAR CSTSTRING COMMA Expr RPAR{ Print($3, $5)       }
-  | PRINTLN LPAR  Access RPAR           { Println($3)         }
-  | NOT Expr                            { Prim1("!", $2)      }
   | Expr PLUS  Expr                     { Prim2("+",  $1, $3) }
   | Expr MINUS Expr                     { Prim2("-",  $1, $3) }
   | Expr TIMES Expr                     { Prim2("*",  $1, $3) }
@@ -201,6 +209,21 @@ ExprNotAccess:
   | Expr LE    Expr                     { Prim2("<=", $1, $3) }
   | Expr SEQAND Expr                    { Andalso($1, $3)     }
   | Expr SEQOR  Expr                    { Orelse($1, $3)      }
+  | INC Access                          { Self($2,"+",CstI 1) }
+  | Access INC                          { Self($1,"+",CstI 1) }
+  | DECR Access                         { Self($2,"-",CstI 1) }
+  | Access DECR                         { Self($1,"-",CstI 1) }
+  | Access SELFPLUS  Expr               { Self($1,"+",$3)     }
+  | Access SELFMINUS  Expr              { Self($1,"-",$3)     }
+  | Access SELFTIMES  Expr              { Self($1,"*",$3)     }
+  | Access SELFDIV  Expr                { Self($1,"/",$3)     }
+  | Access SELFMOD  Expr                { Self($1,"%",$3)     }
+  | Expr QUE Expr COLON Expr            { Prim3($1,$3,$5)     }
+  | PRINT LPAR CSTSTRING COMMA Expr RPAR{ Print($3, $5)       }
+  | PRINT LPAR CSTINT COMMA Expr RPAR   { PrintHex($3, $5)    }
+  | PRINTLN LPAR  Access RPAR           { Println($3)         }
+  | NOT Expr                            { Prim1("!", $2)      }
+ 
 ;
 
 AtExprNotAccess:

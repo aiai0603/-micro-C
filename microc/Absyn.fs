@@ -16,6 +16,7 @@ type typ =
   | TypeStruct of string
                                                                    
 and expr =    
+  | CreateI of string * int
   | CstI of int   (*constant int*)
   | ConstString of string (*constant string*)
   | ConstChar of char (*constant char*) 
@@ -32,6 +33,8 @@ and expr =
   | Andalso of expr * expr           (* Sequential and              *)
   | Orelse of expr * expr            (* Sequential or               *)
   | Call of string * expr list       (* Function call f(...)        *)
+  | PrintHex of int * expr
+  
   
                                                                    
 and access =                                                       
@@ -52,9 +55,11 @@ and stmt =
   | Switch of expr * stmt list
   | Case of expr * stmt 
   | Default of stmt 
-  | Match of expr * stmt list 
+  | MatchItem of expr * stmt list 
   | Pattern of expr * stmt 
   | MatchAll of stmt
+  | Break
+  | Continue
   
                                                                    
 and stmtordec =                                                    

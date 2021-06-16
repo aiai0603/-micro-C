@@ -48,6 +48,7 @@ type token =
   | VOID
   | WHILE
   | FOR
+  | IN
   | DOWHILE
   | DO
   | UNTIL
@@ -116,6 +117,7 @@ type tokenId =
     | TOKEN_VOID
     | TOKEN_WHILE
     | TOKEN_FOR
+    | TOKEN_IN
     | TOKEN_DOWHILE
     | TOKEN_DO
     | TOKEN_UNTIL

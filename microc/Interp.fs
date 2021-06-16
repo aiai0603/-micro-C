@@ -232,6 +232,15 @@ let rec exec stmt (locEnv : locEnv) (gloEnv : gloEnv) (store : store) : store =
                             loop store3
                       else store2  
           loop store0
+    | Forin(acc,e1,e2,body) -> 
+          let (loc, store1) = access acc locEnv gloEnv store
+          let (re, store2) = eval e1 locEnv gloEnv store1
+          let (re2,store3) = eval e2 locEnv gloEnv  store2
+          match e1 with
+          | CstI i -> let rec loop i stores =
+                          if i<>(re2+1) then loop (i+1) (exec body locEnv gloEnv (setSto stores loc i) )
+                                    else (stores)
+                      loop re store3 
     | DoWhile(body,e) -> 
       let rec loop store1 =
                 //求值 循环条件,注意变更环境 store

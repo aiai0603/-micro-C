@@ -50,7 +50,7 @@ and stmt =
   | Return of expr option            (* Return from method          *)
   | Block of stmtordec list          (* Block: grouping and scope   *)
   | For of expr * expr  * expr * stmt
-  | Forin of expr * expr * stmt
+  | Forin of access * expr *expr * stmt
   | DoUntil of stmt * expr
   | Switch of expr * stmt list
   | Case of expr * stmt 

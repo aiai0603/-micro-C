@@ -39,6 +39,7 @@ let keyword s =
     | "switch"  -> SWITCH
     | "case"    -> CASE
     | "break"   -> BREAK 
+    | "in"      -> IN
     | "continue"-> CONTINUE
     | "default" -> DEFAULT
     | "Struct"  -> STRUCT

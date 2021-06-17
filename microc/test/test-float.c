@@ -1,17 +1,9 @@
-<<<<<<< Updated upstream
 Void main(Int n) {
    Float a;
-   a = 1.25;
-   print("%f",a);
+   a = 1.375;
+   Float b;
+   b = 1.5;
+   print("%f",(a+b));
 
 }
 
-=======
-Void main(Int n) {
-   Float a;
-   a = 1.25;
-   print("%f",a);
-
-}
-
->>>>>>> Stashed changes

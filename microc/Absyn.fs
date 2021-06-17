@@ -8,6 +8,7 @@
 module Absyn
 
 type typ =
+  | TypF
   | TypI                             (* Type int                    *)
   | TypC                             (* Type char                   *)
   | TypA of typ * int option         (* Array type                  *)
@@ -20,6 +21,7 @@ and expr =
   | CstI of int   (*constant int*)
   | ConstString of string (*constant string*)
   | ConstChar of char (*constant char*) 
+  | ConstFloat of float32
   | ConstNull of int (*default 0*)                                                     
   | Access of access                 (* x    or  *p    or  a[e]     *)
   | Assign of access * expr          (* x=e  or  *p=e  or  a[e]=e   *)

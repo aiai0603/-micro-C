@@ -1,8 +1,8 @@
-(* File MicroC/Comp.fs  test......
+(* File MicroC/Comp.fs test.........
    A compiler from micro-C, a sublanguage of the C language, to an
    abstract machine.  Direct (forwards) compilation without
    optimization of jumps to jumps, tail-calls etc.
-   sestoft@itu.dk * 2009-09-23, 2011-11-10
+   sestoft@itu.dk * 2009-09-23, 2011-11-10 
 
    A value is an integer; it may represent an integer or a pointer,
    where a pointer is just an address in the store (of a variable or

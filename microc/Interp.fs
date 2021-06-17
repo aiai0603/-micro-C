@@ -190,6 +190,69 @@ let initEnvAndStore (topdecs : topdec list) : locEnv * funEnv * store =
     addv topdecs ([], 0) [] emptyStore
 
 (* ------------------------------------------------------------------- *)
+let float2BitInt  (a:float32) :int= 
+   let mutable sflag = "0"
+   if a > (float32 0) then sflag = "0"
+                      else sflag = "1"
+   let mutable temp = int a
+   let mutable tail = a-float32 (int a)
+   let mutable re = ""
+
+   let mutable count = 0;
+   while temp<>0 && count<8 do
+      re <-  (string (temp % 2)) + re
+      count <- count+1
+      temp <- temp / 2
+   while count <8 do
+      re<- "0"+re
+      count <- count+1
+   let mutable count2 = 0;
+   while  tail<> float32 0  && count2<23 do
+      tail <- tail+ tail
+      re <- re + string( (  int tail  )%2 )
+      count2 <- count2+1
+      tail <- tail - (float32 (int tail))
+   while count2 <23 do
+      re<- re+"0"
+      count2 <- count2+1
+   re <- sflag + re;
+
+   printfn "%s" re
+
+   let mutable fin = 0;
+   for i=0 to 31 do
+        fin<- ( fin * 10 +  int (string (re.Chars(i))) )
+   fin
+
+let Int2float  (a:int) :float32= 
+    printf "%d" a
+    let mutable s = "";
+    let mutable temp = a;
+    while temp<>0 do
+      s <- (string (temp%2))  + s;
+      temp <- temp/2;
+    while s.Length<32 do 
+      s <- "0" + s
+
+    printfn "%s" s
+    
+    let mutable a = 1;
+    let mutable main = 0;
+    
+    if s.Chars(0).Equals('1') then
+      a <- -1;
+    for i=0 to 8 do
+        main <- main*10 + (int (s.Chars(i+1)))
+    
+    let mutable fina = float32 main
+    let mutable pow = 0.5F
+
+    for i=0 to 22 do
+        fina <- fina+ (float32 (s.Chars(i+9)))*pow
+        pow <- pow * pow
+    
+    fina*(float32 a)
+    
 
 (* Interpreting micro-C statements *)
 
@@ -241,6 +304,18 @@ let rec exec stmt (locEnv : locEnv) (gloEnv : gloEnv) (store : store) : store =
                           if i<>(re2+1) then loop (i+1) (exec body locEnv gloEnv (setSto stores loc i) )
                                     else (stores)
                       loop re store3 
+          | Access acc -> match acc with
+                          | AccIndex(ac, idx) ->
+                            let rec loop i stores =
+                              match i with 
+                              | Access acc2 -> match acc2 with
+                                              | AccIndex(ac2, idx2) ->
+                                                let ( index,stores2) = eval idx2 locEnv gloEnv stores ;
+                                                if i<>e2 then let (result,s) = eval i locEnv gloEnv stores2
+                                                              loop (Access (AccIndex (ac,CstI (index+1)) ) ) (exec body locEnv gloEnv (setSto s loc result) )
+                                                         else let (result,s) = eval i locEnv gloEnv stores2
+                                                              exec body locEnv gloEnv (setSto s loc result) 
+                            loop e1 store3 
     | DoWhile(body,e) -> 
       let rec loop store1 =
                 //求值 循环条件,注意变更环境 store
@@ -286,8 +361,8 @@ let rec exec stmt (locEnv : locEnv) (gloEnv : gloEnv) (store : store) : store =
               if v=0 then loop (exec body locEnv gloEnv store2)
                       else store2  //退出循环返回 环境store2
       loop (exec body locEnv gloEnv store)
-    | Break -> failwith("ready to do")
-    | Continue -> failwith("ready to do")
+    | Break -> failwith("break not implemented")
+    | Continue -> failwith("continue not implemented")
 
 and stmtordec stmtordec locEnv gloEnv store = 
     match stmtordec with 
@@ -337,6 +412,7 @@ and eval e locEnv gloEnv store : 'a * store =
     | CstI i         -> (i, store)
     | ConstNull i    -> (i ,store)
     | ConstString s  -> (s.Length,store)
+    | ConstFloat f   -> (float2BitInt f,store)
     | ConstChar c    -> ((int c), store)
     | Addr acc       -> access acc locEnv gloEnv store
     | Println(acc)   -> let (loc, store1) = access acc locEnv gloEnv store
@@ -351,6 +427,7 @@ and eval e locEnv gloEnv store : 'a * store =
                           match op with
                           | "%c"   -> (printf "%c " (char i1); i1)
                           | "%d"   -> (printf "%d " i1; i1)  
+                          | "%f"   -> (printf "%f " (Int2float(i1));i1 )
                         (res, store1)  
     | PrintHex(hex,e1)->let (i1, store1) = eval e1 locEnv gloEnv store
                         let mutable temp = i1

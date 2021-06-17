@@ -42,6 +42,7 @@ type token =
   | ELSE
   | IF
   | INT
+  | FLOAT
   | NULL
   | PRINT
   | RETURN
@@ -64,6 +65,7 @@ type token =
   | CREATEI
   | BREAK
   | CONTINUE
+  | CSTFLOAT of (float32)
   | CSTCHAR of (char)
   | CSTSTRING of (string)
   | NAME of (string)
@@ -111,6 +113,7 @@ type tokenId =
     | TOKEN_ELSE
     | TOKEN_IF
     | TOKEN_INT
+    | TOKEN_FLOAT
     | TOKEN_NULL
     | TOKEN_PRINT
     | TOKEN_RETURN
@@ -133,6 +136,7 @@ type tokenId =
     | TOKEN_CREATEI
     | TOKEN_BREAK
     | TOKEN_CONTINUE
+    | TOKEN_CSTFLOAT
     | TOKEN_CSTCHAR
     | TOKEN_CSTSTRING
     | TOKEN_NAME
@@ -167,6 +171,7 @@ type nonTerminalId =
     | NONTERM_StmtPattern
     | NONTERM_Const
     | NONTERM_ConstString
+    | NONTERM_ConstFloat
     | NONTERM_ConstChar
     | NONTERM_Type
 /// This function maps tokens to integer indexes

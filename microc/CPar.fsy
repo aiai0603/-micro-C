@@ -37,8 +37,9 @@ let nl = CstI 10 //  \n 的 ASCII 码
 %token <int> CSTINT CSTBOOL  // <int> 是词元的语义值类型
 %token <string> CSTSTRING NAME
 %token <char> CSTCHAR
+%token <float32> CSTFLOAT
 
-%token CHAR ELSE IF INT NULL PRINT RETURN VOID WHILE FOR IN DOWHILE DO UNTIL DOUNTIL SWITCH CASE MATCH WITH DEFAULT STRING STRUCT PRINTLN CREATEI BREAK CONTINUE
+%token CHAR ELSE IF INT FLOAT NULL PRINT RETURN VOID WHILE FOR IN DOWHILE DO UNTIL DOUNTIL SWITCH CASE MATCH WITH DEFAULT STRING STRUCT PRINTLN CREATEI BREAK CONTINUE
 %token PLUS MINUS TIMES DIV MOD INC DECR   SELFPLUS SELFMINUS SELFTIMES SELFDIV SELFMOD
 %token EQ NE GT LT GE LE
 %token NOT SEQOR SEQAND 
@@ -235,6 +236,7 @@ AtExprNotAccess:
     Const                               { CstI $1             }
   | ConstString                         { ConstString($1)     }
   | ConstChar                           { ConstChar($1)       }
+  | ConstFloat                          { ConstFloat($1)      }
   | LPAR ExprNotAccess RPAR             { $2                  } 
   | AMP Access                          { Addr $2             }
 ;
@@ -283,6 +285,10 @@ ConstString:
   CSTSTRING                             { $1       }
 ;
 
+ConstFloat:
+    CSTFLOAT                            { $1       }
+  | MINUS CSTFLOAT                      { - $2     }
+
 
 ConstChar:
   CSTCHAR                               { $1       }
@@ -292,5 +298,6 @@ Type:
     INT                                 { TypI     }
   | CHAR                                { TypC     }
   | STRING                              { TypS     }
+  | FLOAT                               { TypF     }
   | STRUCT  NAME                        { TypeStruct($2) }
 ;

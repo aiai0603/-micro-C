@@ -78,6 +78,7 @@ Topdecs:
 Topdec: 
     Vardec SEMI                         { Vardec (fst $1, snd $1) }
   | Fundec                              { $1 }
+  | StructDec SEMI                      { Structdec(fst $1,snd $1) }
 ;
 
 /*                                               
@@ -171,7 +172,7 @@ StmtM:  /* No unbalanced if-else */
   | RETURN Expr SEMI                    { Return(Some($2))  }
   | Block                               { $1                }
   | SWITCH LPAR Expr RPAR LBRACE StmtCase RBRACE        { Switch($3,$6)  }
-  | MATCH Expr WITH StmtPattern         { MatchItem($2,$4)      }  
+  | MATCH Expr WITH StmtPattern         { MatchItem($2,$4)  }  
   | IF LPAR Expr RPAR StmtM ELSE StmtM  { If($3, $5, $7)    }
   | WHILE LPAR Expr RPAR StmtM          { While($3, $5)     }
   | DO StmtM WHILE LPAR Expr RPAR SEMI  { DoWhile($2, $5)   }

@@ -1,10 +1,11 @@
-Void main(Int n) {
-  
-    Struct test{
+Struct test {
         Int a;
-        Char b;
-    } t;
+        String b;
+} ;
     
+Void main(Int n) {
+  Struct test t;
+ 
 
 }
 

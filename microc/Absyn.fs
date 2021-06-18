@@ -26,6 +26,9 @@ and expr =
   | Access of access                 (* x    or  *p    or  a[e]     *)
   | Assign of access * expr          (* x=e  or  *p=e  or  a[e]=e   *)
   | Self of  access * string * expr
+  | ToInt of expr
+  | ToChar of expr
+  | ToFloat of expr
   | Print of string * expr
   | Println of access
   | Addr of access                   (* &x   or  &*p   or  &a[e]    *)

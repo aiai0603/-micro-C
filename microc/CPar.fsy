@@ -40,7 +40,7 @@ let nl = CstI 10 //  \n 的 ASCII 码
 %token <float32> CSTFLOAT
 
 %token CHAR ELSE IF INT FLOAT NULL PRINT RETURN VOID WHILE FOR IN DOWHILE DO UNTIL DOUNTIL SWITCH CASE MATCH WITH DEFAULT STRING STRUCT PRINTLN CREATEI BREAK CONTINUE
-%token PLUS MINUS TIMES DIV MOD INC DECR   SELFPLUS SELFMINUS SELFTIMES SELFDIV SELFMOD
+%token PLUS MINUS TIMES DIV MOD INC DECR   SELFPLUS SELFMINUS SELFTIMES SELFDIV SELFMOD TOCHAR TOINT TOFLOAT
 %token EQ NE GT LT GE LE
 %token NOT SEQOR SEQAND 
 %token LPAR RPAR LBRACE RBRACE LBRACK RBRACK SEMI COMMA ASSIGN AMP COLON DEAL MATCHS ALL QUE
@@ -58,6 +58,7 @@ let nl = CstI 10 //  \n 的 ASCII 码
 %left TIMES DIV MOD 
 %right INC DECR 
 %nonassoc NOT AMP
+%right TOCHAR TOINT TOFLOAT
 %nonassoc LBRACK     /* highest precedence  */
 
 %start Main            // 语法开始符号
@@ -196,9 +197,12 @@ Expr:
 
 ExprNotAccess:
     AtExprNotAccess                     { $1                  }
-  | CREATEI LPAR CSTSTRING COMMA CSTINT RPAR {CreateI($3,$5)     }
+  | CREATEI LPAR CSTSTRING COMMA CSTINT RPAR {CreateI($3,$5)  }
   | Access ASSIGN Expr                  { Assign($1, $3)      }
   | NAME LPAR Exprs RPAR                { Call($1, $3)        }  
+  | LPAR TOCHAR RPAR Expr               { ToChar($4)          }
+  | LPAR TOINT RPAR Expr                { ToInt($4)           }
+  | LPAR TOFLOAT RPAR Expr              { ToFloat($4)         }
   | Expr PLUS  Expr                     { Prim2("+",  $1, $3) }
   | Expr MINUS Expr                     { Prim2("-",  $1, $3) }
   | Expr TIMES Expr                     { Prim2("*",  $1, $3) }

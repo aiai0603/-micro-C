@@ -394,6 +394,16 @@ and stmtordec stmtordec locEnv gloEnv structEnv store =
 and eval e locEnv gloEnv structEnv store : 'a * store = 
 
     match e with
+    | ToInt e -> match e with
+                 | ConstChar c -> (int c - int '0',store)
+                 | ConstFloat f -> (int f,store)
+                 | _ -> eval e locEnv gloEnv structEnv store
+    | ToChar e -> match e with
+                 | CstI i -> (i + int '0',store)
+                 | _ -> eval e locEnv gloEnv structEnv store
+    | ToFloat e -> match e with
+                 | CstI i -> (float2BitInt( float32 i),store)
+                 | _ -> eval e locEnv gloEnv structEnv store
     | CreateI(s,hex) -> let mutable res = 0;
                         for i=0 to s.Length-1 do
                            if s.Chars(i)>='0' && s.Chars(i)<='9' then

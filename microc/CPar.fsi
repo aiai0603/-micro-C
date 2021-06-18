@@ -38,6 +38,9 @@ type token =
   | SELFTIMES
   | SELFDIV
   | SELFMOD
+  | TOCHAR
+  | TOINT
+  | TOFLOAT
   | CHAR
   | ELSE
   | IF
@@ -109,6 +112,9 @@ type tokenId =
     | TOKEN_SELFTIMES
     | TOKEN_SELFDIV
     | TOKEN_SELFMOD
+    | TOKEN_TOCHAR
+    | TOKEN_TOINT
+    | TOKEN_TOFLOAT
     | TOKEN_CHAR
     | TOKEN_ELSE
     | TOKEN_IF

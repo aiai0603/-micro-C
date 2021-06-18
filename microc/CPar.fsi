@@ -41,6 +41,7 @@ type token =
   | TOCHAR
   | TOINT
   | TOFLOAT
+  | POINT
   | CHAR
   | ELSE
   | IF
@@ -115,6 +116,7 @@ type tokenId =
     | TOKEN_TOCHAR
     | TOKEN_TOINT
     | TOKEN_TOFLOAT
+    | TOKEN_POINT
     | TOKEN_CHAR
     | TOKEN_ELSE
     | TOKEN_IF

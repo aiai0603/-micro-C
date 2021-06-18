@@ -46,10 +46,10 @@ let rec lookup env x =
     | []         -> failwith (x + " not found")
     | (y, v)::yr -> if x=y then v else lookup yr x
 
-let rec structLookup env x =
+let rec structLookup env x index=
     match env with
     | []                            -> failwith(x + " not found")
-    | (name, arglist, size)::rhs    -> if x = name then (name, arglist, size) else structLookup rhs x
+    | (name, arglist, size)::rhs    -> if x = name then (index, arglist, size) else structLookup rhs x (index+1)
 
 (* A local variable environment also knows the next unused store location *)
 
@@ -163,9 +163,8 @@ let rec allocate (typ, x) (env0, nextloc) structEnv sto0 : locEnv * store =
         | TypA (t, Some i) -> (nextloc+i, nextloc, initSto nextloc i sto0)
         // 默认值是 -1
         | TypS  -> (nextloc+128, nextloc, initSto nextloc 128 sto0)
-        | TypeStruct s -> let (name,arg,size) = structLookup structEnv s 
-                          printf "%d" size
-                          (nextloc+size, nextloc, initSto nextloc size sto0)
+        | TypeStruct s -> let (index,arg,size) = structLookup structEnv s 0
+                          (nextloc+size, index, initSto nextloc size sto0)
         | _ -> (nextloc, -1, sto0)
        
     bindVar x v (env0, nextloc1) sto1
@@ -520,6 +519,24 @@ and access acc locEnv gloEnv structEnv store : int * store =
       let aval = getSto store1 a
       let (i, store2) = eval idx locEnv gloEnv structEnv store1
       (aval + i, store2) 
+    | AccStruct(acc,acc2) ->  let (a, store1) = access acc locEnv gloEnv structEnv store
+                              let aval = getSto store1 a
+                              let list = structEnv.[aval]
+                              let param =
+                                  match list with 
+                                  | (string,paramdecs,int) -> paramdecs
+                              let rec lookupidx list index = 
+                                  match list with
+                                  | [] -> failwith("can not find ")
+                                  | (typ , name ) ::tail -> match acc2 with
+                                                            | AccVar x -> if x = name then ( index + ( allsize typ ) )
+                                                                                      else lookupidx tail ( index + ( allsize typ) )
+                                                            | AccIndex( acc3, idx ) ->  match acc3 with
+                                                                                        | AccVar y ->  if name = y then 
+                                                                                                       let (i, store2) = eval idx locEnv gloEnv structEnv store1
+                                                                                                       (index + i)
+                                                                                                       else lookupidx tail (index + (allsize typ))
+                              (lookupidx param 0,store1)
 
 and evals es locEnv gloEnv structEnv store : int list * store = 
     match es with 

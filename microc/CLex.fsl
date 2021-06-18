@@ -94,6 +94,7 @@ rule Token = parse          // 每个 规则rule 会生成为一个函数，函�
   | '%'             { MOD }                     
   | '='             { ASSIGN } 
   | "=="            { EQ } 
+  | '.'             { POINT }
   | "+="            { SELFPLUS }
   | "-="            { SELFMINUS }
   | "*="            { SELFTIMES }

@@ -207,11 +207,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\git\\-micro-C\\microc\\interpc.fsproj",
+      "projectUniqueName": "C:\\Users\\asus\\Desktop\\microc\\interpc.fsproj",
       "projectName": "interpc",
-      "projectPath": "D:\\git\\-micro-C\\microc\\interpc.fsproj",
+      "projectPath": "C:\\Users\\asus\\Desktop\\microc\\interpc.fsproj",
       "packagesPath": "C:\\Users\\asus\\.nuget\\packages\\",
-      "outputPath": "D:\\git\\-micro-C\\microc\\obj\\",
+      "outputPath": "C:\\Users\\asus\\Desktop\\microc\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

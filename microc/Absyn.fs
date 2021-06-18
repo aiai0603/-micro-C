@@ -46,6 +46,7 @@ and access =
   | AccVar of string                 (* Variable access        x    *) 
   | AccDeref of expr                 (* Pointer dereferencing  *p   *)
   | AccIndex of access * expr        (* Array indexing         a[e] *)
+  | AccStruct of access * access
                                                                    
 and stmt =                                                         
   | If of expr * stmt * stmt         (* Conditional                 *)

@@ -23,7 +23,7 @@ and expr =
   | ConstString of string (*constant string*)
   | ConstChar of char (*constant char*) 
   | ConstFloat of float32
-  | ConstNull of int (*default 0*)                                                     
+  | ConstNull                                                     
   | Access of access                 (* x    or  *p    or  a[e]     *)
   | Assign of access * expr          (* x=e  or  *p=e  or  a[e]=e   *)
   | Self of  access * string * expr

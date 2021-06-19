@@ -9,4 +9,5 @@ Int main(){
     Int n;
     n=4;
     print("%d", fact(n));
+    print("%d",n);
 }

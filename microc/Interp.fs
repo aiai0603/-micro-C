@@ -443,7 +443,7 @@ and eval e locEnv gloEnv structEnv store : int  * store =
                           | _ ->  eval e locEnv gloEnv structEnv store1
                         (res, setSto store2 loc res) 
     | CstI i         -> (i, store)
-    | ConstNull i    -> (i ,store)
+    | ConstNull      -> (0 ,store)
     | ConstString s  -> (s.Length,store)
     | ConstFloat f   -> (float2BitInt f,store)
     | ConstChar c    -> ((int c), store)

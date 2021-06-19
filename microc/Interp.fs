@@ -303,7 +303,11 @@ let rec exec stmt (locEnv : locEnv) (gloEnv : gloEnv)(structEnv: structEnv) (sto
                             // 调用loop 用变更后的环境 解释后面的语句 sr.
           | s1::sr -> loop sr (stmtordec s1 locEnv gloEnv structEnv store)
       loop stmts (locEnv, store) 
-    | Return _ -> failwith "return not implemented"  // 解释器没有实现 return
+    | Return e ->  match e with
+                  | Some e1 -> let (res ,store0) = eval e1 locEnv gloEnv structEnv store;
+                               let st = store0.Add(-1, res);
+                               (st)                     
+                  | None -> store
     | For(e1,e2,e3,body) -> 
           let (res ,store0) = eval e1 locEnv gloEnv structEnv store
           let rec loop store1 =
@@ -378,7 +382,7 @@ let rec exec stmt (locEnv : locEnv) (gloEnv : gloEnv)(structEnv: structEnv) (sto
               let (v, store2) = eval e locEnv gloEnv structEnv  store1
                 // 继续循环
               if v=0 then loop (exec body locEnv gloEnv structEnv  store2)
-                      else store2  //退出循环返回 环境store2
+                     else store2  //退出循环返回 环境store2
       loop (exec body locEnv gloEnv structEnv store)
     | Break -> failwith("break not implemented")
     | Continue -> failwith("continue not implemented")
@@ -390,7 +394,7 @@ and stmtordec stmtordec locEnv gloEnv structEnv store =
 
 (* Evaluating micro-C expressions *)
 
-and eval e locEnv gloEnv structEnv store : 'a * store = 
+and eval e locEnv gloEnv structEnv store : int  * store = 
 
     match e with
     | ToInt e -> match e with
@@ -556,8 +560,12 @@ and callfun f es locEnv gloEnv structEnv store : int * store =
     let (vs, store1) = evals es locEnv gloEnv structEnv store
     let (fBodyEnv, store2) = 
         bindVars (List.map snd paramdecs) vs (varEnv, nextloc) store1
-    let store3 = exec fBody fBodyEnv gloEnv structEnv store2 
-    (-111, store3)
+    let store3 = exec fBody fBodyEnv gloEnv structEnv store2
+    let res = store3.TryFind(-1) 
+    let restore = store3.Remove(-1)
+    match res with
+    | None -> (0,restore)
+    | Some i -> (i,restore)
 
 (* Interpret a complete micro-C program by initializing the store 
    and global environments, then invoking its `main' function.

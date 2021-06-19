@@ -82,7 +82,7 @@ rule Token = parse          // 每个 规则rule 会生成为一个函数，函�
                     { CSTFLOAT (System.Single.Parse (lexemeAsString lexbuf)) } 
   | ['a'-'z''A'-'Z']['a'-'z''A'-'Z''0'-'9']*
                     { keyword (lexemeAsString lexbuf) } //标识符处理
-                                                       //先查是否是关键字，是则返回对应关键字的Token
+                                                        //先查是否是关键字，是则返回对应关键字的Token
   | '+'             { PLUS }  // 返回Token PLUS 给调用词法分析器的程序，通常是Parser
                               // 此时lexbuf是 匹配 '+'完成后，后续的内容 
   | "++"            { INC }

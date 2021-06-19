@@ -15,6 +15,7 @@ type typ =
   | TypS                             (* Type string                *)
   | TypP of typ                      (* Pointer type                *)
   | TypeStruct of string
+  | Lambda of  typ option * string * (typ * string) list * stmt
                                                                    
 and expr =    
   | CreateI of string * int

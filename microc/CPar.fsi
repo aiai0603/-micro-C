@@ -41,7 +41,10 @@ type token =
   | TOCHAR
   | TOINT
   | TOFLOAT
+<<<<<<< Updated upstream
   | POINT
+=======
+>>>>>>> Stashed changes
   | CHAR
   | ELSE
   | IF
@@ -116,7 +119,10 @@ type tokenId =
     | TOKEN_TOCHAR
     | TOKEN_TOINT
     | TOKEN_TOFLOAT
+<<<<<<< Updated upstream
     | TOKEN_POINT
+=======
+>>>>>>> Stashed changes
     | TOKEN_CHAR
     | TOKEN_ELSE
     | TOKEN_IF

@@ -536,7 +536,7 @@ and access acc locEnv gloEnv structEnv store : int * store =
                                                                                                        let (i, store2) = eval idx locEnv gloEnv structEnv store1
                                                                                                        (index + i)
                                                                                                        else lookupidx tail (index + (allsize typ))
-                              (lookupidx param 0,store1)
+                              ((a+(lookupidx param 0)),store1)
 
 and evals es locEnv gloEnv structEnv store : int list * store = 
     match es with 

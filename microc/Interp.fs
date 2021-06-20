@@ -575,8 +575,9 @@ let initEnvAndStore (topdecs : topdec list) : locEnv * funEnv * structEnv * stor
             | ( typ ,string ):: tail -> sizeof tail ((allsize typ) + all)
           let fin = sizeof list 0
           addv decr locEnv funEnv ((name,list, fin) :: structEnv) store
-          
-
+        | VariableDeclareAndAssign (typ,x,e) :: decr ->
+          let (locEnv1, sto1) = allocate (typ, x) locEnv structEnv store
+          addv decr locEnv1 funEnv structEnv sto1 
           
     
     // ([], 0) []  默认全局环境 

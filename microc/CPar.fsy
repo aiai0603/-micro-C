@@ -83,6 +83,7 @@ Topdecs:
 Topdec: 
     Vardec SEMI                         { Vardec (fst $1, snd $1) }
   | Fundec                              { $1 }
+  | VariableDeclareAndAssign SEMI       { VariableDeclareAndAssign(first $1, second $1 , third $1)  }
   | StructDec SEMI                      { Structdec(fst $1,snd $1) }
 ;
 

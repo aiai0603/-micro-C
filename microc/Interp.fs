@@ -347,14 +347,12 @@ let rec exec stmt (locEnv : locEnv) (gloEnv : gloEnv)(structEnv: structEnv) (sto
     | MatchAll (body )->  exec body locEnv gloEnv structEnv  store
     | DoUntil(body,e) -> 
       let rec loop store1 =
-                //求值 循环条件,注意变更环境 store
               let (v, store2) = eval e locEnv gloEnv structEnv  store1
-                // 继续循环
-              if v=0 then loop (exec body locEnv gloEnv structEnv  store2)
-                     else store2  //退出循环返回 环境store2
+                      if v=0 then loop (exec body locEnv gloEnv structEnv  store2)
+                             else store2    
       loop (exec body locEnv gloEnv structEnv store)
-    | Break -> failwith("break not implemented")
-    | Continue -> failwith("continue not implemented")
+    | Break -> failwith("break")
+    | Continue -> failwith("continue")
 
 and stmtordec stmtordec locEnv gloEnv structEnv store = 
     match stmtordec with 

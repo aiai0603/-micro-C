@@ -180,37 +180,6 @@ let allsize typ =
     |  _ -> 1
 
 
-//初始化 解释器环境和store
-let initEnvAndStore (topdecs : topdec list) : locEnv * funEnv * structEnv * store = 
-    
-    //包括全局函数和全局变量
-    info (fun () -> printf "topdecs:%A\n" topdecs)
-
-    let rec addv decs locEnv funEnv structEnv store = 
-        match decs with 
-        | [] -> (locEnv, funEnv,structEnv, store)
-        
-        // 全局变量声明  调用allocate 在store上给变量分配空间
-        | Vardec (typ, x) :: decr -> 
-          let (locEnv1, sto1) = allocate (typ, x) locEnv structEnv store
-          addv decr locEnv1 funEnv structEnv sto1 
-        
-        //全局函数 将声明(f,(xs,body))添加到全局函数环境 funEnv
-        | Fundec (_, f, xs, body) :: decr ->
-          addv decr locEnv ((f, (xs, body)) :: funEnv) structEnv store
-        | Structdec (name,list) :: decr ->
-          let rec sizeof list all = 
-            match list with
-            | [] -> all
-            | ( typ ,string ):: tail -> sizeof tail ((allsize typ) + all)
-          let fin = sizeof list 0
-          addv decr locEnv funEnv ((name,list, fin) :: structEnv) store
-    
-    // ([], 0) []  默认全局环境 
-    // locEnv ([],0) 变量环境 ，变量定义为空列表[],下一个空闲地址为0
-    // ([("n", 1); ("r", 0)], 2)  表示定义了 变量 n , r 下一个可以用的变量索引是 2
-    // funEnv []   函数环境，函数定义为空列表[]
-    addv topdecs ([], 0) [] [] emptyStore
 
 (* ------------------------------------------------------------------- *)
 let float2BitInt  (a:float32) :int= 
@@ -391,6 +360,17 @@ and stmtordec stmtordec locEnv gloEnv structEnv store =
     match stmtordec with 
     | Stmt stmt   -> (locEnv, exec stmt locEnv gloEnv structEnv store)
     | Dec(typ, x) -> allocate (typ, x)  locEnv structEnv store
+    | DeclareAndAssign(typ, x,e) -> let (loc,store1) = allocate (typ, x)  locEnv structEnv store
+                                    let (loc2, store2) = access (AccVar x) loc gloEnv structEnv store1
+                                    let (res, store3) = 
+                                      match e with
+                                      | ConstString s ->  let rec sign index stores=
+                                                           if index<s.Length then
+                                                              sign (index+1) ( setSto stores (loc2-index-1) (int (s.Chars(index) ) ) )
+                                                            else stores  
+                                                          ( s.Length   ,sign 0 store2)
+                                      | _ ->  eval e loc gloEnv structEnv store2
+                                    (loc, setSto store3 loc2 res) 
 
 (* Evaluating micro-C expressions *)
 
@@ -570,6 +550,42 @@ and callfun f es locEnv gloEnv structEnv store : int * store =
 (* Interpret a complete micro-C program by initializing the store 
    and global environments, then invoking its `main' function.
  *)
+ 
+
+
+let initEnvAndStore (topdecs : topdec list) : locEnv * funEnv * structEnv * store = 
+    
+    //包括全局函数和全局变量
+    info (fun () -> printf "topdecs:%A\n" topdecs)
+
+    let rec addv decs locEnv funEnv structEnv store = 
+        match decs with 
+        | [] -> (locEnv, funEnv,structEnv, store)
+        
+        // 全局变量声明  调用allocate 在store上给变量分配空间
+        | Vardec (typ, x) :: decr -> 
+          let (locEnv1, sto1) = allocate (typ, x) locEnv structEnv store
+          addv decr locEnv1 funEnv structEnv sto1 
+        | Fundec (_, f, xs, body) :: decr ->
+          addv decr locEnv ((f, (xs, body)) :: funEnv) structEnv store
+        | Structdec (name,list) :: decr ->
+          let rec sizeof list all = 
+            match list with
+            | [] -> all
+            | ( typ ,string ):: tail -> sizeof tail ((allsize typ) + all)
+          let fin = sizeof list 0
+          addv decr locEnv funEnv ((name,list, fin) :: structEnv) store
+          
+
+          
+    
+    // ([], 0) []  默认全局环境 
+    // locEnv ([],0) 变量环境 ，变量定义为空列表[],下一个空闲地址为0
+    // ([("n", 1); ("r", 0)], 2)  表示定义了 变量 n , r 下一个可以用的变量索引是 2
+    // funEnv []   函数环境，函数定义为空列表[]
+    addv topdecs ([], 0) [] [] emptyStore
+
+
 
 // run 返回的结果是 代表内存更改的 store 类型
 // vs 参数列表 [8,2,...]

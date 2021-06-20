@@ -7,6 +7,10 @@
 open Absyn
 open System.Text.RegularExpressions
 
+let first  (a, _, _) = a
+let second (_, b, _) = b
+let third  (_, _, c) = c
+
 let (|InterpretedMatch|_|) pattern input =
     if input = null then None
     else
@@ -117,6 +121,10 @@ MemberList:
     | Vardec SEMI MemberList { $1 :: $3 }
 ;
 
+VariableDeclareAndAssign:
+    Type  Vardesc ASSIGN Expr    { ((fst $2) $1, snd $2 , $4) }
+;
+
 // 变量描述
 Vardesc:                         
     // "i"    标识符
@@ -160,6 +168,7 @@ StmtOrDecSeq:
     /* empty */                         { [] }
   | Stmt StmtOrDecSeq                   { Stmt $1 :: $2 }
   | Vardec SEMI StmtOrDecSeq            { Dec (fst $1, snd $1) :: $3 }
+  | VariableDeclareAndAssign SEMI StmtOrDecSeq { DeclareAndAssign(first $1, second $1 , third $1) :: $3 }
 ;
 
 Stmt: 
@@ -294,7 +303,7 @@ ConstString:
 ConstFloat:
     CSTFLOAT                            { $1       }
   | MINUS CSTFLOAT                      { - $2     }
-
+; 
 
 ConstChar:
   CSTCHAR                               { $1       }

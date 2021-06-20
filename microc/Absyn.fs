@@ -72,11 +72,13 @@ and stmt =
 and stmtordec =                                                    
   | Dec of typ * string              (* Local variable declaration  *)
   | Stmt of stmt                     (* A statement                 *)
+  | DeclareAndAssign of typ * string * expr
 
 and topdec = 
   | Fundec of typ option * string * (typ * string) list * stmt
   | Vardec of typ * string
   | Structdec of  string * (typ * string) list 
+  | VariableDeclareAndAssign of typ * string * expr
 
 and program = 
   | Prog of topdec list

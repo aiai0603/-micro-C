@@ -160,6 +160,7 @@ type nonTerminalId =
     | NONTERM_Vardec
     | NONTERM_StructDec
     | NONTERM_MemberList
+    | NONTERM_VariableDeclareAndAssign
     | NONTERM_Vardesc
     | NONTERM_Fundec
     | NONTERM_Paramdecs

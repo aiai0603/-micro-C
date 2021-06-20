@@ -154,7 +154,6 @@ let rec cStmt stmt (varEnv : VarEnv) (funEnv : FunEnv) : instr list =
       [RET (snd varEnv - 1)]
     | Return (Some e) -> 
       cExpr e varEnv funEnv @ [RET (snd varEnv)]
-    | For (e,stmt1,stmt2,stmt3) ->  [RET (snd varEnv - 1)]
 
 and cStmtOrDec stmtOrDec (varEnv : VarEnv) (funEnv : FunEnv) : VarEnv * instr list = 
     match stmtOrDec with 
@@ -179,11 +178,18 @@ and cExpr (e : expr) (varEnv : VarEnv) (funEnv : FunEnv) : instr list =
     | Assign(acc, e) -> cAccess acc varEnv funEnv @ cExpr e varEnv funEnv @ [STI]
     | CstI i         -> [CSTI i]
     | Addr acc       -> cAccess acc varEnv funEnv
+    | Print(s,e)     ->  
+      cExpr e varEnv funEnv
+      @ (match s with
+         | "%d"      -> [PRINTI]
+         | "%c"      -> [PRINTC]
+        // | "%f"      -> [PRINTF]
+         | _        -> raise (Failure "unknown primitive 1"))
     | Prim1(ope, e1) ->
       cExpr e1 varEnv funEnv
       @ (match ope with
          | "!"      -> [NOT]
-         | "printi" -> [PRINTI]
+         | "print" -> [PRINTI]
          | "printc" -> [PRINTC]
          | _        -> raise (Failure "unknown primitive 1"))
     | Prim2(ope, e1, e2) ->

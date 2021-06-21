@@ -247,12 +247,19 @@ and cExpr (e : expr) (varEnv : VarEnv) (funEnv : FunEnv) (C : instr list) : inst
     | Assign(acc, e) -> cAccess acc varEnv funEnv (cExpr e varEnv funEnv (STI :: C))
     | CstI i         -> addCST i C
     | Addr acc       -> cAccess acc varEnv funEnv C
+    | Print(s,e)     ->  
+      cExpr e varEnv funEnv
+        (match s with
+         | "%d"      -> [PRINTI]
+         | "%c"      -> [PRINTC]
+        // | "%f"      -> [PRINTF]
+         | _        -> raise (Failure "unknown print type"))
     | Prim1(ope, e1) ->
       cExpr e1 varEnv funEnv
           (match ope with
            | "!"      -> addNOT C
-           | "printi" -> PRINTI :: C
-           | "printc" -> PRINTC :: C
+     //      | "printi" -> PRINTI :: C
+     //      | "printc" -> PRINTC :: C
            | _        -> failwith "unknown primitive 1")
     | Prim2(ope, e1, e2) ->
       cExpr e1 varEnv funEnv

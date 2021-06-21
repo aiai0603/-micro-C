@@ -195,26 +195,31 @@ let rec cStmt stmt (varEnv : VarEnv) (funEnv : FunEnv) (lablist : LabEnv) (struc
         let (jumptest, C1) = 
             makeJump (cExpr e varEnv funEnv lablist structEnv (IFNZRO labbegin :: Cend))
         addJump jumptest (Label labbegin :: cStmt body varEnv funEnv lablist structEnv C1)
+    | DoUntil(body,e) ->
+        let labbegin = newLabel()
+        let C1 = 
+            cExpr e varEnv funEnv lablist structEnv (IFZERO labbegin :: C)
+        Label labbegin :: cStmt body varEnv funEnv lablist structEnv C1
     | Switch(e,cases)   ->
         let (labend, C1) = addLabel C
         let lablist = labend :: lablist
         let rec everycase c  = 
             match c with
-            | [Case(cond,body)] -> 
-                let (label,C2) = addLabel(cStmt body varEnv funEnv lablist structEnv C1 )
-                let (label2, C3) = addLabel( cExpr (Prim2 ("==",e,cond)) varEnv funEnv lablist structEnv (IFZERO labend :: C2))
-                (label,label2,C3)
             | Case(cond,body) :: tr->
                 let (labnextbody,labnext,C2) = everycase tr
                 let (label, C3) = addLabel(cStmt body varEnv funEnv lablist structEnv (addGOTO labnextbody C2))
                 let (label2, C4) = addLabel( cExpr (Prim2 ("==",e,cond)) varEnv funEnv lablist structEnv (IFZERO labnext :: C3))
+                (label,label2,C4)
+            | Default( body ) :: tr -> 
+                let (labnextbody,labnext,C2) = everycase tr
+                let (label, C3) = addLabel(cStmt body varEnv funEnv lablist structEnv (addGOTO labnextbody C2))
+                let (label2, C4) = addLabel(cExpr (Prim2 ("==",e,e)) varEnv funEnv lablist structEnv (IFZERO labnext :: C3))
                 (label,label2,C4)
             | [] -> (labend, labend,C1)
         let (label,label2,C2) = everycase cases
         C2
     | Case(cond,body)  ->
         C
-   
     | DoWhile(body, e) ->
         let labbegin = newLabel()
         let C1 = 
@@ -303,6 +308,7 @@ and cExpr (e : expr) (varEnv : VarEnv) (funEnv : FunEnv) (lablist : LabEnv) (str
             (match ope with
             | "%d"  -> PRINTI :: C
             | "%c"  -> PRINTC :: C
+           
             )
     | Prim1(ope, e1) ->
         let rec tmp stat =
@@ -311,8 +317,8 @@ and cExpr (e : expr) (varEnv : VarEnv) (funEnv : FunEnv) (lablist : LabEnv) (str
         cExpr e1 varEnv funEnv lablist structEnv
             (match ope with
             | "!"       -> addNOT C
-            | "printi"  -> PRINTI :: C
-            | "printc"  -> PRINTC :: C
+           // | "printi"  -> PRINTI :: C
+           // | "printc"  -> PRINTC :: C
             | _         -> failwith "Error: unknown unary operator")
     | Prim2(ope, e1, e2)    ->
         cExpr e1 varEnv funEnv lablist structEnv

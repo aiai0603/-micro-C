@@ -7,6 +7,7 @@ Void main(Int n) {
     bb=1;
 
     print("%d",a);
+    return 0;
 
 }
 

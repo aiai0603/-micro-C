@@ -67,7 +67,12 @@ and stmt =
   | MatchAll of stmt
   | Break
   | Continue
+  | Throw of Exception
+  | Try of stmt * stmt list
+  | Catch of expr * stmt
   
+and Exception = 
+    | Exception of string
                                                                    
 and stmtordec =                                                    
   | Dec of typ * string              (* Local variable declaration  *)

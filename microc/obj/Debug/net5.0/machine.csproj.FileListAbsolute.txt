@@ -38,3 +38,11 @@ D:\git\-micro-C\microc\obj\Debug\net5.0\machine.csproj.CoreCompileInputs.cache
 D:\git\-micro-C\microc\obj\Debug\net5.0\machine.dll
 D:\git\-micro-C\microc\obj\Debug\net5.0\ref\machine.dll
 D:\git\-micro-C\microc\obj\Debug\net5.0\machine.pdb
+C:\Users\asus\Desktop\microc\obj\Debug\net5.0\machine.csprojAssemblyReference.cache
+C:\Users\asus\Desktop\microc\obj\Debug\net5.0\machine.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\asus\Desktop\microc\obj\Debug\net5.0\machine.AssemblyInfoInputs.cache
+C:\Users\asus\Desktop\microc\obj\Debug\net5.0\machine.AssemblyInfo.cs
+C:\Users\asus\Desktop\microc\obj\Debug\net5.0\machine.csproj.CoreCompileInputs.cache
+C:\Users\asus\Desktop\microc\obj\Debug\net5.0\machine.dll
+C:\Users\asus\Desktop\microc\obj\Debug\net5.0\ref\machine.dll
+C:\Users\asus\Desktop\microc\obj\Debug\net5.0\machine.pdb

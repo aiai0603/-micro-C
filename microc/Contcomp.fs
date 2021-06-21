@@ -105,6 +105,7 @@ type Var =
     | Glovar of int
     | Locvar of int
     | StructMemberLoc of int
+
 let rec structLookupVar env x lastloc =
     match env with
     | []                            -> failwith(x + " not found")
@@ -183,7 +184,6 @@ let rec dellab labs =
 
 let rec cStmt stmt (varEnv : VarEnv) (funEnv : FunEnv) (lablist : LabEnv) (structEnv : StructTypeEnv) (C : instr list) : instr list = 
     match stmt with
-    // | Case (_, _)   ->  
     | If(e, stmt1, stmt2) ->
         let (jumpend, C1) = makeJump C
         let (labelse, C2) = addLabel (cStmt stmt2 varEnv funEnv lablist structEnv C1)
@@ -195,7 +195,6 @@ let rec cStmt stmt (varEnv : VarEnv) (funEnv : FunEnv) (lablist : LabEnv) (struc
         let (jumptest, C1) = 
             makeJump (cExpr e varEnv funEnv lablist structEnv (IFNZRO labbegin :: Cend))
         addJump jumptest (Label labbegin :: cStmt body varEnv funEnv lablist structEnv C1)
-
     | Switch(e,cases)   ->
         let (labend, C1) = addLabel C
         let lablist = labend :: lablist
@@ -299,6 +298,12 @@ and cExpr (e : expr) (varEnv : VarEnv) (funEnv : FunEnv) (lablist : LabEnv) (str
     | ConstFloat i      -> addCSTF i C
     | ConstChar i       -> addCSTC i C
     | Access acc       -> cAccess acc varEnv funEnv lablist structEnv C
+    | Print(ope,e1)  ->
+         cExpr e1 varEnv funEnv lablist structEnv
+            (match ope with
+            | "%d"  -> PRINTI :: C
+            | "%c"  -> PRINTC :: C
+            )
     | Prim1(ope, e1) ->
         let rec tmp stat =
                     match stat with
@@ -308,20 +313,6 @@ and cExpr (e : expr) (varEnv : VarEnv) (funEnv : FunEnv) (lablist : LabEnv) (str
             | "!"       -> addNOT C
             | "printi"  -> PRINTI :: C
             | "printc"  -> PRINTC :: C
-            | "I++" -> 
-                let ass = Assign (tmp e1,Prim2 ("+",Access (tmp e1),CstI 1))
-                cExpr ass varEnv funEnv lablist structEnv (addINCSP -1 C)
-            | "I--" ->
-                let ass = Assign (tmp e1,Prim2 ("-",Access (tmp e1),CstI 1))
-                cExpr ass varEnv funEnv lablist structEnv (addINCSP -1 C)
-            | "++I" -> 
-                let ass = Assign (tmp e1,Prim2 ("+",Access (tmp e1),CstI 1))
-                let C1 = cExpr ass varEnv funEnv lablist structEnv C
-                CSTI 1 :: ADD :: (addINCSP -1 C1)
-            | "--I" -> 
-                let ass = Assign (tmp e1,Prim2 ("-",Access (tmp e1),CstI 1))
-                let C1 = cExpr ass varEnv funEnv lablist structEnv C
-                CSTI 1 :: SUB :: (addINCSP -1 C1)
             | _         -> failwith "Error: unknown unary operator")
     | Prim2(ope, e1, e2)    ->
         cExpr e1 varEnv funEnv lablist structEnv
@@ -380,7 +371,6 @@ and cExpr (e : expr) (varEnv : VarEnv) (funEnv : FunEnv) (lablist : LabEnv) (str
                 (IFNZRO labtrue
                     :: cExpr e2 varEnv funEnv lablist structEnv (addJump jumpend C2))
     | Call(f, es)   -> callfun f es varEnv funEnv lablist (structEnv : StructTypeEnv) C
-
 
 and structAllocateDef(kind : int -> Var) (structName : string) (typ : typ) (varName : string) (structTypEnv : StructTypeEnv) : StructTypeEnv = 
     match structTypEnv with

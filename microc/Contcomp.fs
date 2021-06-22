@@ -200,12 +200,30 @@ let rec cStmt stmt (varEnv : VarEnv) (funEnv : FunEnv) (lablist : LabEnv) (struc
         let C1 = 
             cExpr e varEnv funEnv lablist structEnv (IFZERO labbegin :: C)
         Label labbegin :: cStmt body varEnv funEnv lablist structEnv C1
+    | MatchItem(e,cases) ->  
+        let (labend, C1) = addLabel C
+        let lablist = labend :: lablist
+        let rec everycase c  = 
+            match c with
+            | Pattern(cond,body) :: tr->
+                let (labnextbody,labnext,C2) = everycase tr
+                let (label, C3) = addLabel(cStmt body varEnv funEnv lablist structEnv (addGOTO labnextbody C2))
+                let (label2, C4) = addLabel( cExpr (Prim2 ("==",e,cond)) varEnv funEnv lablist structEnv (IFZERO labnext :: C3))
+                (label,label2,C4)
+            | MatchAll( body ) :: tr -> 
+                let (labnextbody,labnext,C2) = everycase tr
+                let (label, C3) = addLabel(cStmt body varEnv funEnv lablist structEnv (addGOTO labnextbody C2))
+                let (label2, C4) = addLabel( cExpr (Prim2 ("==",e,e)) varEnv funEnv lablist structEnv (IFZERO labnext :: C3))
+                (label,label2,C4)
+            | [] -> (labend, labend,C1)
+        let (label,label2,C2) = everycase cases
+        C2
     | Switch(e,cases)   ->
         let (labend, C1) = addLabel C
         let lablist = labend :: lablist
         let rec everycase c  = 
             match c with
-            | Case(cond,body) :: tr->
+            | Case(cond,body) :: tr ->
                 let (labnextbody,labnext,C2) = everycase tr
                 let (label, C3) = addLabel(cStmt body varEnv funEnv lablist structEnv (addGOTO labnextbody C2))
                 let (label2, C4) = addLabel( cExpr (Prim2 ("==",e,cond)) varEnv funEnv lablist structEnv (IFZERO labnext :: C3))
@@ -219,6 +237,10 @@ let rec cStmt stmt (varEnv : VarEnv) (funEnv : FunEnv) (lablist : LabEnv) (struc
         let (label,label2,C2) = everycase cases
         C2
     | Case(cond,body)  ->
+        C
+    | Pattern(cond,body) ->
+        C
+    | MatchAll( body ) ->
         C
     | DoWhile(body, e) ->
         let labbegin = newLabel()
@@ -235,8 +257,7 @@ let rec cStmt stmt (varEnv : VarEnv) (funEnv : FunEnv) (lablist : LabEnv) (struc
             makeJump (cExpr e varEnv funEnv lablist structEnv (IFNZRO labbegin :: Cend)) 
         let C3 = Label labope :: cExpr opera varEnv funEnv lablist structEnv (addINCSP -1 C2)
         let C4 = cStmt body varEnv funEnv lablist structEnv C3    
-        cExpr dec varEnv funEnv lablist structEnv (addINCSP -1 (addJump jumptest  (Label labbegin :: C4) ) ) //dec Label: body  opera  testjumpToBegin 指令的顺序
-// compileToFile (fromFile "testing/ex(for).c ") "testing/ex(for).out";;     
+        cExpr dec varEnv funEnv lablist structEnv (addINCSP -1 (addJump jumptest  (Label labbegin :: C4) ) ) //dec Label: body  opera  testjumpToBegin 指令的顺序  
     | Expr e ->
         cExpr e varEnv funEnv lablist structEnv (addINCSP -1 C)
     | Block stmts ->
@@ -320,19 +341,25 @@ and cExpr (e : expr) (varEnv : VarEnv) (funEnv : FunEnv) (lablist : LabEnv) (str
                            else 
                              failwith("ERROR WORLD IN NUMBER")
                         addCST res C     
- //   | Self(acc,ope,e)->  
-  //      let rec tmp stat =
-  //          match stat with
-  //          | Access (c) -> c              
-      //  cExpr e varEnv funEnv lablist structEnv
-           // (match ope with
-          //  | "+" -> 
-           //     let ass = Assign (tmp e1,BinaryPrimitiveOperator ("+",Access (tmp e1),ConstInt 1))
-          //      cExpr ass varEnv funEnv lablist structEnv (addINCSP -1 C)
-          //  | "-" ->
-          //      let ass = Assign (tmp e1,BinaryPrimitiveOperator ("-",Access (tmp e1),ConstInt 1))
-          //      cExpr ass varEnv funEnv lablist structEnv (addINCSP -1 C)
-          //  | _         -> failwith "Error: unknown unary operator")
+    | Self(acc,ope,e)->             
+        cExpr e varEnv funEnv lablist structEnv
+            (match ope with
+            | "+" -> 
+                let ass = Assign (acc,Prim2("+",Access acc, e))
+                cExpr ass varEnv funEnv lablist structEnv (addINCSP -1 C)
+            | "-" ->
+                let ass = Assign (acc,Prim2("-",Access acc, e))
+                cExpr ass varEnv funEnv lablist structEnv (addINCSP -1 C)
+            | "*" -> 
+                let ass = Assign (acc,Prim2("*",Access acc, e))
+                cExpr ass varEnv funEnv lablist structEnv (addINCSP -1 C)
+            | "/" ->
+                let ass = Assign (acc,Prim2("/",Access acc, e))
+                cExpr ass varEnv funEnv lablist structEnv (addINCSP -1 C)
+            | "%" ->
+                let ass = Assign (acc,Prim2("%",Access acc, e))
+                cExpr ass varEnv funEnv lablist structEnv (addINCSP -1 C)
+            | _         -> failwith "Error: unknown unary operator")
     | Print(ope,e1)  ->
          cExpr e1 varEnv funEnv lablist structEnv
             (match ope with
@@ -340,6 +367,7 @@ and cExpr (e : expr) (varEnv : VarEnv) (funEnv : FunEnv) (lablist : LabEnv) (str
             | "%c"  -> PRINTC :: C
             | "%f"  -> PRINTF :: C
             )
+    | PrintHex(hex,e1)  -> failwith("Error")
     | Prim1(ope, e1) ->
         let rec tmp stat =
                     match stat with

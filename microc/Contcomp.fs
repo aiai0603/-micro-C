@@ -6,10 +6,9 @@ open Absyn
 open Machine
 
 type bstmtordec = 
-    | BDec of instr list     //局部变量的声明
-    | BStmt of stmt      //一个声明
+    | BDec of instr list
+    | BStmt of stmt
 
-//执行局部优化的代码生成函数
 let rec addINCSP m1 C : instr list = 
     match C with
     | INCSP m2              :: C1   -> addINCSP (m1+m2) C1
@@ -89,20 +88,13 @@ let rec addCSTC i C =
     match (i, C) with
     | _                     -> (CSTC ((int32)(System.BitConverter.ToInt16(System.BitConverter.GetBytes(char(i)), 0)))) :: C
 
-
-// 多态类型 Env 
-// 环境Env 是 元组 ("name",data)的列表 
-// 值 data可以是任意类型
 type 'data Env = (string * 'data) list
 
-//环境查找函数 
-//在环境env上查找名称为x的值
 let rec lookup env x = 
     match env with
     | []            -> failwith(x + " not found")
     | (y, v)::yr    -> if x=y then v else lookup yr x
 
-//在环境env上查找名称为x的结构体
 let rec structLookup env x =
     match env with
     | []                            -> failwith(x + " not found")
@@ -110,9 +102,9 @@ let rec structLookup env x =
 
 
 type Var = 
-    | Glovar of int     //栈内绝对地址
-    | Locvar of int         //相对地址
-    | StructMemberLoc of int         //结构成员变量的相对地址
+    | Glovar of int
+    | Locvar of int
+    | StructMemberLoc of int
 
 let rec structLookupVar env x lastloc =
     match env with
@@ -128,38 +120,26 @@ let rec structLookupVar env x lastloc =
 
 
 
-//变量环境列表
-//变量环境跟踪全局和局部变量，以及跟踪局部变量的下一个可用偏移量
+
 type VarEnv = (Var * typ) Env * int
 
-//结构体类型环境跟踪结构体类型
 type StructTypeEnv = (string * (Var * typ) Env * int) list 
 
-//函数参数例子:
-//void func (int a , int *p)
-// 参数声明列表为: [(TypI,"a");(TypP(TypI) ,"p")]
 type Paramdecs = (typ * string) list
 
-
-(* 函数环境列表  
-    ”函数名“ ”返回类型“ “参数列表”
-*)
 type FunEnv = (label * typ option * Paramdecs) Env
 
-//函数名列表
 type LabEnv = label list
 
-//绑定varEnv中声明的变量并生成代码来分配它
+
 let allocate (kind : int -> Var) (typ, x) (varEnv : VarEnv) (structEnv : StructTypeEnv): VarEnv *  instr list =
     let (env, fdepth) = varEnv
     match typ with
     | TypA (TypA _, _)    -> failwith "Warning: allocate-arrays of arrays not permitted" 
-     //如果是数组，就分配i个空间，由于fdepth是指向下一个的，所以要加i+1
     | TypA (t, Some i)         ->
         let newEnv = ((x, (kind (fdepth+i), typ)) :: env, fdepth+i+1)
         let code = [INCSP i; GETSP; CSTI (i-1); SUB]
         (newEnv, code)
-     //如果是结构体，先从结构体环境中查找结构体信息，然后分配 size + 1个空间
     | TypeStruct structName     ->
         let (name, argslist, size) = structLookup structEnv structName
         // let rec traverse args envir = 
@@ -181,17 +161,14 @@ let allocate (kind : int -> Var) (typ, x) (varEnv : VarEnv) (structEnv : StructT
         // let newEnvr = traverse argslist env
         let newEnvr = ((x, (kind (fdepth + size + 1), typ)) :: env, fdepth+size+1+1)
         (newEnvr, code)
-     //如果是其他的类型，只要分配1个空间就可以了
     | _     ->
         let newEnv = ((x, (kind (fdepth), typ)) :: env, fdepth+1)
         let code = [INCSP 1]
         (newEnv, code)
 
-//绑定单个声明的变量到变量环境列表中
 let bindParam (env, fdepth) (typ, x) : VarEnv =
     ((x, (Locvar fdepth, typ)) :: env, fdepth+1);
 
-//绑定多个声明的变量到变量环境列表中
 let bindParams paras (env, fdepth) : VarEnv = 
     List.fold bindParam (env, fdepth) paras;
 
@@ -205,13 +182,6 @@ let rec dellab labs =
         | lab :: tr ->   tr
         | []        ->   []
 
-
-(*  编译micro-C语句：
-    * stmt是要编译的语句
-    * varEnv是局部和全局变量环境
-    * funEnv是全局功能环境
-    * C是stmt代码编译后的代码
-*)
 let rec cStmt stmt (varEnv : VarEnv) (funEnv : FunEnv) (lablist : LabEnv) (structEnv : StructTypeEnv) (C : instr list) : instr list = 
     match stmt with
     | If(e, stmt1, stmt2) ->
@@ -267,7 +237,6 @@ let rec cStmt stmt (varEnv : VarEnv) (funEnv : FunEnv) (lablist : LabEnv) (struc
         let C4 = cStmt body varEnv funEnv lablist structEnv C3    
         cExpr dec varEnv funEnv lablist structEnv (addINCSP -1 (addJump jumptest  (Label labbegin :: C4) ) ) //dec Label: body  opera  testjumpToBegin 指令的顺序
 // compileToFile (fromFile "testing/ex(for).c ") "testing/ex(for).out";;     
-   
     | Expr e ->
         cExpr e varEnv funEnv lablist structEnv (addINCSP -1 C)
     | Block stmts ->
@@ -329,16 +298,47 @@ and cExpr (e : expr) (varEnv : VarEnv) (funEnv : FunEnv) (lablist : LabEnv) (str
     match e with
     | Access acc        -> cAccess acc varEnv funEnv lablist structEnv (LDI :: C)
     | Assign(acc, e)    -> cAccess acc varEnv funEnv lablist structEnv (cExpr e varEnv funEnv lablist structEnv (STI :: C))
-    | CstI i        -> addCST i C
+    | ToInt e           -> match e with
+                           |  ConstFloat f -> addCST (int f) C
+                           |  ConstChar c -> addCST (int c - int '0') C
+    | ToChar e          -> match e with
+                           |  CstI i -> addCSTC (i + int '0') C                        
+    | ToFloat e         -> match e with
+                           |  CstI i -> addCSTF (float32 i) C                     
     | ConstFloat i      -> addCSTF i C
-    | ConstChar i       -> addCSTC i C
+    | ConstChar i       -> addCSTC (int i) C
+    | CstI i        -> addCST i C
     | Access acc       -> cAccess acc varEnv funEnv lablist structEnv C
+    | CreateI(s,hex) -> let mutable res = 0;
+                        for i=0 to s.Length-1 do
+                           if s.Chars(i)>='0' && s.Chars(i)<='9' then
+                             res <- res*hex + ( (int (s.Chars(i)))-(int '0') )
+                           elif s.Chars(i)>='a' && s.Chars(i)<='f' then
+                             res <- res*hex + ( (int (s.Chars(i)))-(int 'a')+10 )
+                           elif s.Chars(i)>='A' && s.Chars(i)<='F' then
+                             res <- res*hex + ( (int (s.Chars(i)))-(int 'A')+10 )
+                           else 
+                             failwith("ERROR WORLD IN NUMBER")
+                        addCST res C     
+ //   | Self(acc,ope,e)->  
+  //      let rec tmp stat =
+  //          match stat with
+  //          | Access (c) -> c              
+      //  cExpr e varEnv funEnv lablist structEnv
+           // (match ope with
+          //  | "+" -> 
+           //     let ass = Assign (tmp e1,BinaryPrimitiveOperator ("+",Access (tmp e1),ConstInt 1))
+          //      cExpr ass varEnv funEnv lablist structEnv (addINCSP -1 C)
+          //  | "-" ->
+          //      let ass = Assign (tmp e1,BinaryPrimitiveOperator ("-",Access (tmp e1),ConstInt 1))
+          //      cExpr ass varEnv funEnv lablist structEnv (addINCSP -1 C)
+          //  | _         -> failwith "Error: unknown unary operator")
     | Print(ope,e1)  ->
          cExpr e1 varEnv funEnv lablist structEnv
             (match ope with
             | "%d"  -> PRINTI :: C
             | "%c"  -> PRINTC :: C
-           
+            | "%f"  -> PRINTF :: C
             )
     | Prim1(ope, e1) ->
         let rec tmp stat =
@@ -347,8 +347,6 @@ and cExpr (e : expr) (varEnv : VarEnv) (funEnv : FunEnv) (lablist : LabEnv) (str
         cExpr e1 varEnv funEnv lablist structEnv
             (match ope with
             | "!"       -> addNOT C
-           // | "printi"  -> PRINTI :: C
-           // | "printc"  -> PRINTC :: C
             | _         -> failwith "Error: unknown unary operator")
     | Prim2(ope, e1, e2)    ->
         cExpr e1 varEnv funEnv lablist structEnv
@@ -448,29 +446,18 @@ and makeStructEnvs(structName : string) (structEntry :(typ * string) list ) (str
 
     addm structName structEntry structTypEnv
     
-//创建全局环境 变量环境VarEnv 函数环境FunEnv 结构体类型环境StructTypeEnv 虚拟机操作list
 and makeGlobalEnvs(topdecs : topdec list) : VarEnv * FunEnv * StructTypeEnv * instr list =
-    //绑定添加函数
     let rec addv decs varEnv funEnv structTypEnv =
         match decs with
-         //如果语句为空，则返回环境
         | [] -> (varEnv, funEnv, structTypEnv, [])
-        //如果语句列表不为空，则把list的head选取出来进行模式配对
         | dec::decr ->
             match dec with
-            //如果匹配到Vardec（也就是我们定义的变量声明 typ*string <类型+名称>）
             | Vardec (typ, x) -> 
-                //allocate函数对变量绑定分配,返回变量环境varEnv1和虚拟机操作code1
                 let (varEnv1, code1) = allocate Glovar (typ, x) varEnv structTypEnv
-                 //递归更新
                 let (varEnvr, funEnvr, structTypEnvr, coder) = addv decr varEnv1 funEnv structTypEnv
-                 //将每次的虚拟机操作添加到code1上，再返回全局环境
                 (varEnvr, funEnvr, structTypEnvr, code1 @ coder)
-             //如果匹配到的是VariableDeclareAndAssign（也就是变量声明和赋值 typ * string * expr）
             | VariableDeclareAndAssign (typ, x, e) -> 
-                //allocate函数对变量绑定分配,返回变量环境varEnv1和虚拟机操作code1
                 let (varEnv1, code1) = allocate Glovar (typ, x) varEnv structTypEnv
-                 //递归更新
                 let (varEnvr, funEnvr, structTypEnvr, coder) = addv decr varEnv1 funEnv structTypEnv
                 (varEnvr, funEnvr, structTypEnvr, code1 @ (cAccess (AccVar(x)) varEnvr funEnvr [] structTypEnv (cExpr e varEnvr funEnvr [] structTypEnv (STI :: (addINCSP -1 coder)))))
             | Fundec (tyOpt, f, xs, body) ->
@@ -479,13 +466,12 @@ and makeGlobalEnvs(topdecs : topdec list) : VarEnv * FunEnv * StructTypeEnv * in
                 let structTypEnv1 = makeStructEnvs typName typEntry structTypEnv
                 let (varEnvr, funEnvr, structTypEnvr, coder) = addv decr varEnv funEnv structTypEnv1
                 (varEnvr, funEnvr, structTypEnvr, coder)
-    //运行函数          
+                
     addv topdecs ([], 0) [] []
 
-//生成代码以访问变量、取消引用指针或索引数组
+
 and cAccess access varEnv funEnv lablist (structEnv : StructTypeEnv) C =
     match access with
-    //若匹配的是可访问的变量x
     | AccVar x  ->
         match lookup (fst varEnv) x with
         | Glovar addr, _ -> addCST addr C

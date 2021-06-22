@@ -30,4 +30,5 @@ public class Instruction {
     public final static int THROW = 28;
     public final static int PUSHHR = 29;
     public final static int POPHR = 30;
+    public final static int PRINTF = 31;
 }

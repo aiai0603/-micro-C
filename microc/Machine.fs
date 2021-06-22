@@ -35,6 +35,7 @@ type instr =
     | THROW of int
     | PUSHHDLR of int * label
     | POPHDLR
+    | PRINTF
 
 let (resetLabels, newLabel) =
     let lastlab = ref -1
@@ -138,8 +139,13 @@ let CODETHROW   = 28;
 [<Literal>]
 let CODEPUSHHR  = 29;
 
+
 [<Literal>]
 let CODEPOPHR   = 30;
+
+[<Literal>]
+let CODEPRINTF  = 31
+
 
 let makelabenv (addr, labenv) instr = 
     match instr with
@@ -170,6 +176,7 @@ let makelabenv (addr, labenv) instr =
     | RET m             -> (addr+2, labenv)
     | PRINTI            -> (addr+1, labenv)
     | PRINTC            -> (addr+1, labenv)
+    | PRINTF            -> (addr+1, labenv)
     | LDARGS            -> (addr+1, labenv)
     | STOP              -> (addr+1, labenv)
     | THROW i           -> (addr+2, labenv)
@@ -206,6 +213,7 @@ let rec emitints getlab instr ints =
     | RET m             -> CODERET      :: m            :: ints
     | PRINTI            -> CODEPRINTI   :: ints
     | PRINTC            -> CODEPRINTC   :: ints
+    | PRINTF            -> CODEPRINTF   :: ints
     | LDARGS            -> CODELDARGS   :: ints
     | STOP              -> CODESTOP     :: ints
     | THROW i           -> CODETHROW    :: i            :: ints
@@ -251,6 +259,7 @@ let rec decomp ints : instr list =
     | CODERET    :: m :: ints_rest                  ->   RET m          :: decomp ints_rest
     | CODEPRINTI :: ints_rest                       ->   PRINTI         :: decomp ints_rest
     | CODEPRINTC :: ints_rest                       ->   PRINTC         :: decomp ints_rest
+    | CODEPRINTF :: ints_rest                       ->   PRINTF         :: decomp ints_rest
     | CODELDARGS :: ints_rest                       ->   LDARGS         :: decomp ints_rest
     | CODESTOP   :: ints_rest                       ->   STOP           :: decomp ints_rest
     | CODECSTI   :: i :: ints_rest                  ->   CSTI i         :: decomp ints_rest       

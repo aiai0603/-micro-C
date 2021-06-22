@@ -243,6 +243,8 @@ public class Machine {
                 }
                 case Instruction.PRINTC:
                     System.out.print((((CubyCharType)stack[sp])).getValue()); break;
+                case Instruction.PRINTF:
+                    System.out.print((((CubyFloatType)stack[sp])).getValue()); break;
                 case Instruction.LDARGS:
                     for (int i=0; i < inputArgs.length; i++) // Push commandline arguments
                         stack[++sp] = inputArgs[i];

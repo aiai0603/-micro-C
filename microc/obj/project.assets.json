@@ -258,11 +258,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\asus\\Desktop\\microc\\microcc.fsproj",
+      "projectUniqueName": "D:\\git\\-micro-C\\microc\\microcc.fsproj",
       "projectName": "microcc",
-      "projectPath": "C:\\Users\\asus\\Desktop\\microc\\microcc.fsproj",
+      "projectPath": "D:\\git\\-micro-C\\microc\\microcc.fsproj",
       "packagesPath": "C:\\Users\\asus\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\asus\\Desktop\\microc\\obj\\",
+      "outputPath": "D:\\git\\-micro-C\\microc\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

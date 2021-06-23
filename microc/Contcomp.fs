@@ -260,6 +260,31 @@ let rec cStmt stmt (varEnv : VarEnv) (funEnv : FunEnv) (lablist : LabEnv) (struc
         cExpr dec varEnv funEnv lablist structEnv (addINCSP -1 (addJump jumptest  (Label labbegin :: C4) ) ) //dec Label: body  opera  testjumpToBegin 指令的顺序  
     | Expr e ->
         cExpr e varEnv funEnv lablist structEnv (addINCSP -1 C)
+    | Forin(dec,i1,i2,body) ->
+        let rec tmp stat =
+                    match stat with
+                    | Access (c) -> c 
+        let rec idx stat =
+                    match stat with
+                    | AccIndex (acc,idx) -> idx
+        match i1 with 
+        | Access acc  ->             
+            let labend   = newLabel()                       //结束label
+            let labbegin = newLabel()                       //设置label 
+            let labope   = newLabel()                       //设置 for(,,opera) 的label
+            let lablist = labend :: labope :: lablist
+            let Cend = Label labend :: C
+            let (jumptest, C2) =                                                
+                makeJump (cExpr (Prim2("<",idx acc,idx (temp i2) )) varEnv funEnv lablist structEnv (IFNZRO labbegin :: Cend)) 
+            let C3 = Label labope :: cExpr ( Assign ( dec, Access ( AccIndex( acc1 , Prim2("+",idx acc,CstI 1) ) )  ) )varEnv funEnv lablist structEnv (addINCSP -1 C2)
+            let C4 = cStmt body varEnv funEnv lablist structEnv C3    
+                cExpr (Access dec) varEnv funEnv lablist structEnv (addINCSP -1 (addJump jumptest  (Label labbegin :: C4) ) )
+        | _  -> 
+            let ass = Assign ( dec,i1)
+            let judge =  Prim2("<",Access dec,i2)  
+            let opera = Assign ( dec, Prim2("+",Access dec,CstI 1))
+            cStmt (For (ass,judge,opera,body))    varEnv funEnv lablist structEnv C
+       
     | Block stmts ->
         let rec pass1 stmts ((_, fdepth) as varEnv) = 
             match stmts with
@@ -304,7 +329,6 @@ and tryStmt tryBlock (varEnv : VarEnv) (funEnv : FunEnv) (lablist : LabEnv) (str
             | (BStmt stmt, varEnv) :: sr -> cStmt stmt varEnv funEnv lablist structEnv (pass2 sr C)
         (pass2 stmtsback (addINCSP(snd varEnv - fdepthend) C),varEnv1)
 and bStmtordec stmtOrDec varEnv (structEnv : StructTypeEnv): bstmtordec * VarEnv =
-
     match stmtOrDec with
     | Stmt stmt    ->
         (BStmt stmt, varEnv)
@@ -352,11 +376,11 @@ and cExpr (e : expr) (varEnv : VarEnv) (funEnv : FunEnv) (lablist : LabEnv) (str
                 cExpr ass varEnv funEnv lablist structEnv (addINCSP -1 C)
             | "+B" -> 
                 let ass = Assign (acc,Prim2("+",Access acc, e))
-                let C1 = cExpr ass varEnv funEnv lablist structEnv (addINCSP -1 C)
+                let C1 = cExpr ass varEnv funEnv lablist structEnv C
                 CSTI 1 :: ADD :: (addINCSP -1 C1)
             | "-B" ->
                 let ass = Assign (acc,Prim2("-",Access acc, e))
-                let C1 = cExpr ass varEnv funEnv lablist structEnv (addINCSP -1 C)
+                let C1 = cExpr ass varEnv funEnv lablist structEnv C
                 CSTI 1 :: SUB :: (addINCSP -1 C1)
             | "*" -> 
                 let ass = Assign (acc,Prim2("*",Access acc, e))

@@ -328,19 +328,19 @@ and cExpr (e : expr) (varEnv : VarEnv) (funEnv : FunEnv) (lablist : LabEnv) (str
                            |  CstI i -> addCSTF (float32 i) C                     
     | ConstFloat i      -> addCSTF i C
     | ConstChar i       -> addCSTC (int i) C
-    | CstI i        -> addCST i C
-    | Access acc       -> cAccess acc varEnv funEnv lablist structEnv C
-    | CreateI(s,hex) -> let mutable res = 0;
-                        for i=0 to s.Length-1 do
-                           if s.Chars(i)>='0' && s.Chars(i)<='9' then
-                             res <- res*hex + ( (int (s.Chars(i)))-(int '0') )
-                           elif s.Chars(i)>='a' && s.Chars(i)<='f' then
-                             res <- res*hex + ( (int (s.Chars(i)))-(int 'a')+10 )
-                           elif s.Chars(i)>='A' && s.Chars(i)<='F' then
-                             res <- res*hex + ( (int (s.Chars(i)))-(int 'A')+10 )
-                           else 
-                             failwith("ERROR WORLD IN NUMBER")
-                        addCST res C     
+    | CstI i            -> addCST i C
+    | Access acc        -> cAccess acc varEnv funEnv lablist structEnv C
+    | CreateI(s,hex)    -> let mutable res = 0;
+                           for i=0 to s.Length-1 do
+                                if s.Chars(i)>='0' && s.Chars(i)<='9' then
+                                    res <- res*hex + ( (int (s.Chars(i)))-(int '0') )
+                                elif s.Chars(i)>='a' && s.Chars(i)<='f' then
+                                    res <- res*hex + ( (int (s.Chars(i)))-(int 'a')+10 )
+                                elif s.Chars(i)>='A' && s.Chars(i)<='F' then
+                                    res <- res*hex + ( (int (s.Chars(i)))-(int 'A')+10 )
+                                else 
+                                    failwith("ERROR WORLD IN NUMBER")
+                           addCST res C     
     | Self(acc,ope,e)->             
         cExpr e varEnv funEnv lablist structEnv
             (match ope with
@@ -350,6 +350,14 @@ and cExpr (e : expr) (varEnv : VarEnv) (funEnv : FunEnv) (lablist : LabEnv) (str
             | "-" ->
                 let ass = Assign (acc,Prim2("-",Access acc, e))
                 cExpr ass varEnv funEnv lablist structEnv (addINCSP -1 C)
+            | "+B" -> 
+                let ass = Assign (acc,Prim2("+",Access acc, e))
+                let C1 = cExpr ass varEnv funEnv lablist structEnv (addINCSP -1 C)
+                CSTI 1 :: ADD :: (addINCSP -1 C1)
+            | "-B" ->
+                let ass = Assign (acc,Prim2("-",Access acc, e))
+                let C1 = cExpr ass varEnv funEnv lablist structEnv (addINCSP -1 C)
+                CSTI 1 :: SUB :: (addINCSP -1 C1)
             | "*" -> 
                 let ass = Assign (acc,Prim2("*",Access acc, e))
                 cExpr ass varEnv funEnv lablist structEnv (addINCSP -1 C)

@@ -1500,7 +1500,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 229 "CPar.fsy"
-                                                               Self(_2,"+",CstI 1) 
+                                                               Self(_2,"+B",CstI 1) 
                    )
 # 229 "CPar.fsy"
                  : 'gentype_ExprNotAccess));
@@ -1522,7 +1522,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 231 "CPar.fsy"
-                                                               Self(_2,"-",CstI 1) 
+                                                               Self(_2,"-B",CstI 1) 
                    )
 # 231 "CPar.fsy"
                  : 'gentype_ExprNotAccess));

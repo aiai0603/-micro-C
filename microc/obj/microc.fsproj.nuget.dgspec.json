@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\asus\\Desktop\\class\\lec\\hw\\plzoofs\\microc\\microc.fsproj": {}
+    "D:\\git\\-micro-C\\microc\\microc.fsproj": {}
   },
   "projects": {
-    "C:\\Users\\asus\\Desktop\\class\\lec\\hw\\plzoofs\\microc\\microc.fsproj": {
+    "D:\\git\\-micro-C\\microc\\microc.fsproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\asus\\Desktop\\class\\lec\\hw\\plzoofs\\microc\\microc.fsproj",
+        "projectUniqueName": "D:\\git\\-micro-C\\microc\\microc.fsproj",
         "projectName": "microc",
-        "projectPath": "C:\\Users\\asus\\Desktop\\class\\lec\\hw\\plzoofs\\microc\\microc.fsproj",
+        "projectPath": "D:\\git\\-micro-C\\microc\\microc.fsproj",
         "packagesPath": "C:\\Users\\asus\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\asus\\Desktop\\class\\lec\\hw\\plzoofs\\microc\\obj\\",
+        "outputPath": "D:\\git\\-micro-C\\microc\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

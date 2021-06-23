@@ -226,9 +226,9 @@ ExprNotAccess:
   | Expr LE    Expr                     { Prim2("<=", $1, $3) }
   | Expr SEQAND Expr                    { Andalso($1, $3)     }
   | Expr SEQOR  Expr                    { Orelse($1, $3)      }
-  | INC Access                          { Self($2,"+",CstI 1) }
+  | INC Access                          { Self($2,"+B",CstI 1) }
   | Access INC                          { Self($1,"+",CstI 1) }
-  | DECR Access                         { Self($2,"-",CstI 1) }
+  | DECR Access                         { Self($2,"-B",CstI 1) }
   | Access DECR                         { Self($1,"-",CstI 1) }
   | Access SELFPLUS  Expr               { Self($1,"+",$3)     }
   | Access SELFMINUS  Expr              { Self($1,"-",$3)     }

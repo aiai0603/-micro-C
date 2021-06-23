@@ -348,8 +348,8 @@ let rec exec stmt (locEnv : locEnv) (gloEnv : gloEnv)(structEnv: structEnv) (sto
     | DoUntil(body,e) -> 
       let rec loop store1 =
               let (v, store2) = eval e locEnv gloEnv structEnv  store1
-                      if v=0 then loop (exec body locEnv gloEnv structEnv  store2)
-                             else store2    
+              if v=0 then loop (exec body locEnv gloEnv structEnv  store2)
+                     else store2    
       loop (exec body locEnv gloEnv structEnv store)
     | Break -> failwith("break")
     | Continue -> failwith("continue")
@@ -401,15 +401,23 @@ and eval e locEnv gloEnv structEnv store : int  * store =
     | Self(acc,opt,e)-> let (loc, store1) = access acc locEnv gloEnv structEnv store
                         let (i1) = getSto store1 loc
                         let (i2, store2) = eval e locEnv gloEnv structEnv store
-                        let res =
-                          match opt with
-                          | "*"  -> i1 * i2
-                          | "+"  -> i1 + i2
-                          | "-"  -> i1 - i2
-                          | "/"  -> i1 / i2
-                          | "%"  -> i1 % i2
-                          | _    -> failwith ("unknown primitive " + opt)
-                        (res, setSto store2 loc res) 
+                        match opt with
+                        | "*"  ->  let res = i1 * i2
+                                   (res, setSto store2 loc res)
+                        | "+B"  -> let res = i1 + i2
+                                   (res, setSto store2 loc res)
+                        | "-B"  -> let res = i1 - i2  
+                                   (res, setSto store2 loc res)
+                        | "+"  ->  let res = i1 + i2
+                                   (i1, setSto store2 loc res)
+                        | "-"  ->  let res = i1 - i2  
+                                   (i1, setSto store2 loc res)
+                        | "/"  ->  let res = i1 / i2  
+                                   (res, setSto store2 loc res)
+                        | "%"  ->  let res = i1 % i2  
+                                   (res, setSto store2 loc res)
+                        | _    -> failwith ("unknown primitive " + opt)
+                       
     | Assign(acc, e) -> let (loc, store1) = access acc locEnv gloEnv structEnv store
                         let (res,store2)= 
                           match e with

@@ -26,3 +26,8 @@ C:\Users\asus\Desktop\class\lec\hw\plzoofs\microc\obj\Debug\net5.0\microc.fsproj
 C:\Users\asus\Desktop\class\lec\hw\plzoofs\microc\obj\Debug\net5.0\microc.dll
 C:\Users\asus\Desktop\class\lec\hw\plzoofs\microc\obj\Debug\net5.0\microc.pdb
 C:\Users\asus\Desktop\class\lec\hw\plzoofs\microc\obj\Debug\net5.0\microc.genruntimeconfig.cache
+D:\git\-micro-C\microc\obj\Debug\net5.0\microc.fsprojAssemblyReference.cache
+D:\git\-micro-C\microc\obj\Debug\net5.0\microc.AssemblyInfoInputs.cache
+D:\git\-micro-C\microc\obj\Debug\net5.0\microc.AssemblyInfo.fs
+D:\git\-micro-C\microc\obj\Debug\net5.0\microc.dll
+D:\git\-micro-C\microc\obj\Debug\net5.0\microc.pdb

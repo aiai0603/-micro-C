@@ -52,9 +52,10 @@ let nl = CstI 10 //  \n 的 ASCII 码
 
 
 %right ASSIGN             /* lowest precedence */  // 最下面的优先级最高
+%left POINT
 %nonassoc PRINT PRINTLN
 %right QUE COLON
-%left SEQOR
+%left SEQOR 
 %left SEQAND
 %left EQ NE 
 %nonassoc GT LT GE LE

@@ -100,6 +100,13 @@ let rec addCSTC i C =
     match (i, C) with
     | _                     -> (CSTC ((int32)(System.BitConverter.ToInt16(System.BitConverter.GetBytes(char(i)), 0)))) :: C
 
+let rec addCSTS (s:string) C =
+    match (s, C) with
+    | _                     -> let mutable list =[];
+                               for i = 0 to s.Length do
+                                   list <- (int (s.Chars(i)))::list
+                               (CSTS list) :: C
+
 // 多态类型 Env 
 // 环境Env 是 元组 ("name",data)的列表 
 // 值 data可以是任意类型
@@ -171,25 +178,14 @@ let allocate (kind : int -> Var) (typ, x) (varEnv : VarEnv) (structEnv : StructT
         let code = [INCSP i; GETSP; CSTI (i-1); SUB]
         (newEnv, code)
       //如果是结构体，先从结构体环境中查找结构体信息，然后分配 size + 1个空间
+    | TypS         ->
+        let newEnv = ((x, (kind (fdepth+128), typ)) :: env, fdepth+128+1)
+        let code = [INCSP 128; GETSP; CSTI (128-1); SUB]
+        (newEnv, code)
+      //如果是结构体，先从结构体环境中查找结构体信息，然后分配 size + 1个空间
     | TypeStruct structName     ->
         let (name, argslist, size) = structLookup structEnv structName
-        // let rec traverse args envir = 
-        //     match args with
-        //     | []        ->      envir
-        //     | (varName, (_, structTyp)):: rhs   ->  
-        //         match structTyp with
-        //         | TypA (TypA _, _)    -> failwith "Warning: allocate-arrays of arrays not permitted" 
-        //         | TypA (t, Some i)         ->
-        //             let newEnv = (x, (kind (fdepth+i), structTyp)) :: envir
-        //             let newEnv1 = traverse rhs newEnv
-        //             newEnv1
-        //         | _     ->
-        //             let newEnv = (x, (kind (fdepth), structTyp)) :: envir
-        //             let newEnv1 = traverse rhs newEnv
-        //             newEnv1
-
         let code = [INCSP (size + 1); GETSP; CSTI (size); SUB]
-        // let newEnvr = traverse argslist env
         let newEnvr = ((x, (kind (fdepth + size + 1), typ)) :: env, fdepth+size+1+1)
         (newEnvr, code)
     //如果是其他的类型，只要分配1个空间就可以了
@@ -319,18 +315,29 @@ let rec cStmt stmt (varEnv : VarEnv) (funEnv : FunEnv) (lablist : LabEnv) (struc
         let rec idx stat =
                     match stat with
                     | AccIndex (acc,idx) -> idx
+        let rec address stat =
+                    match stat with
+                    | AccIndex (acc,idx) -> acc
         match i1 with 
-        | Access acc  ->             
+        | Access acc  -> 
+           
             let labend   = newLabel()                       //结束label
             let labbegin = newLabel()                       //设置label 
             let labope   = newLabel()                       //设置 for(,,opera) 的label
             let lablist = labend :: labope :: lablist
-            let Cend = Label labend :: C
+            
+            
+            let Cend =  Label labend ::  C 
+            let C1 = Label labope ::  cExpr (Assign ( AccVar("tI"), idx acc )) varEnv funEnv lablist structEnv (addINCSP -1 Cend)
             let (jumptest, C2) =                                                
-                makeJump (cExpr (Prim2("<",idx acc,idx (temp i2) )) varEnv funEnv lablist structEnv (IFNZRO labbegin :: Cend)) 
-            let C3 = Label labope :: cExpr ( Assign ( dec, Access ( AccIndex( acc1 , Prim2("+",idx acc,CstI 1) ) )  ) )varEnv funEnv lablist structEnv (addINCSP -1 C2)
-            let C4 = cStmt body varEnv funEnv lablist structEnv C3    
-                cExpr (Access dec) varEnv funEnv lablist structEnv (addINCSP -1 (addJump jumptest  (Label labbegin :: C4) ) )
+                makeJump (cExpr (Prim2("!=", Access (AccVar("tI")) ,idx (tmp i2) )) varEnv funEnv lablist structEnv (IFNZRO labbegin :: C1)) 
+            
+            let C4 = cStmt body varEnv funEnv lablist structEnv C2
+            let C5  = Label labope :: cExpr ( Assign ( AccVar("tI"),  Prim2("+", Access (AccVar("tI")) ,CstI 1) )  ) varEnv funEnv lablist structEnv (addINCSP -1 C4)
+            let C6 = Label labope :: cExpr ( Assign ( dec, Access( AccIndex(  acc , Access( AccVar("tI") ) ))  )  ) varEnv funEnv lablist structEnv (addINCSP -1 C5)
+            
+          
+            cExpr (Assign ( dec, i1 )) varEnv funEnv lablist structEnv (addINCSP -1 (addJump jumptest  (Label labbegin :: C6) ) )
         | _  -> 
             let ass = Assign ( dec,i1)
             let judge =  Prim2("<",Access dec,i2)  
@@ -415,9 +422,9 @@ and cExpr (e : expr) (varEnv : VarEnv) (funEnv : FunEnv) (lablist : LabEnv) (str
     | ToFloat e         -> match e with
                            |  CstI i -> addCSTF (float32 i) C                     
     | ConstFloat i      -> addCSTF i C     //浮点数
+    | ConstString s     -> addCSTS s C     //字符串
     | ConstChar i       -> addCSTC (int i) C   //字符
     | CstI i            -> addCST i C   //整数
-    | Access acc        -> cAccess acc varEnv funEnv lablist structEnv C
     | CreateI(s,hex)    -> let mutable res = 0;
                            for i=0 to s.Length-1 do
                                 if s.Chars(i)>='0' && s.Chars(i)<='9' then
@@ -465,6 +472,7 @@ and cExpr (e : expr) (varEnv : VarEnv) (funEnv : FunEnv) (lablist : LabEnv) (str
             | "%f"  -> PRINTF :: C
             )
     | PrintHex(hex,e1)  -> failwith("Error")
+    | Println acc -> failwith("Error")
     //单目运算
     | Prim1(ope, e1) ->
         let rec tmp stat =

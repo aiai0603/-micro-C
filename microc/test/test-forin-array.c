@@ -7,10 +7,13 @@ Void main(Int n) {
     a[6] =4;
     a[7] =1;
     Int i;
+    Int tI;
     
     for i in (a[3],a[7])
     {
         print("%d",i);
+
+      
     }
 
 

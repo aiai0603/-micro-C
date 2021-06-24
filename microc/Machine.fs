@@ -7,6 +7,7 @@ type instr =
     | CSTI of int32
     | CSTF of int32
     | CSTC of int32
+    | CSTS of int32 list
     | ADD
     | SUB
     | MUL
@@ -146,11 +147,14 @@ let CODEPOPHR   = 30;
 [<Literal>]
 let CODEPRINTF  = 31
 
+[<Literal>]
+let CODECSTS    = 32;
 
 let makelabenv (addr, labenv) instr = 
     match instr with
     | Label lab         -> (addr, (lab, addr) :: labenv)
     | CSTI i            -> (addr+2, labenv)
+    | CSTS str          -> (addr+1+str.Length, labenv)
     | CSTF i            -> (addr+2, labenv)
     | CSTC i            -> (addr+2, labenv)
     | ADD               -> (addr+1, labenv)
@@ -190,6 +194,7 @@ let rec emitints getlab instr ints =
     | CSTI i            -> CODECSTI     :: i            :: ints
     | CSTF i            -> CODECSTF     :: i            :: ints
     | CSTC i            -> CODECSTC     :: i            :: ints
+    | CSTS str          -> CODECSTS     :: str         @ ints
     | ADD               -> CODEADD      :: ints
     | SUB               -> CODESUB      :: ints
     | MUL               -> CODEMUL      :: ints
@@ -264,6 +269,6 @@ let rec decomp ints : instr list =
     | CODESTOP   :: ints_rest                       ->   STOP           :: decomp ints_rest
     | CODECSTI   :: i :: ints_rest                  ->   CSTI i         :: decomp ints_rest       
     | CODECSTF   :: i :: ints_rest                  ->   CSTF i         :: decomp ints_rest    
-    | CODECSTC   :: i :: ints_rest                  ->   CSTC i         :: decomp ints_rest        
+    | CODECSTC   :: i :: ints_rest                  ->   CSTC i         :: decomp ints_rest      
     | _                                             ->    printf "%A" ints; failwith "unknow code"
 

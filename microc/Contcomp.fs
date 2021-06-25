@@ -319,6 +319,7 @@ let rec cStmt stmt (varEnv : VarEnv) (funEnv : FunEnv) (lablist : LabEnv) (struc
                     match stat with
                     | AccIndex (acc,idx) -> acc
         match i1 with 
+        (*
         | Access acc  -> 
            
             let labend   = newLabel()                       //结束label
@@ -338,6 +339,7 @@ let rec cStmt stmt (varEnv : VarEnv) (funEnv : FunEnv) (lablist : LabEnv) (struc
             
           
             cExpr (Assign ( dec, i1 )) varEnv funEnv lablist structEnv (addINCSP -1 (addJump jumptest  (Label labbegin :: C6) ) )
+            *)
         | _  -> 
             let ass = Assign ( dec,i1)
             let judge =  Prim2("<",Access dec,i2)  
@@ -425,6 +427,10 @@ and cExpr (e : expr) (varEnv : VarEnv) (funEnv : FunEnv) (lablist : LabEnv) (str
     | ConstString s     -> addCSTS s C     //字符串
     | ConstChar i       -> addCSTC (int i) C   //字符
     | CstI i            -> addCST i C   //整数
+    | ConstBool b       -> let res = 
+                               if b = false then 0
+                                            else 1
+                           addCST res C   //整数
     | CreateI(s,hex)    -> let mutable res = 0;
                            for i=0 to s.Length-1 do
                                 if s.Chars(i)>='0' && s.Chars(i)<='9' then

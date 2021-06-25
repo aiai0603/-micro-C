@@ -37,6 +37,13 @@ open Debug
 // 环境env 是 元组 ("name",data)的列表 
 // 值 data可以是任意类型
 
+type mem =
+  | Int of Int
+  | String of string
+  | Float of float
+  | Char of char
+  | Boolean of bool
+
 type 'data env = (string * 'data) list
 
 //环境查找函数 
@@ -368,27 +375,159 @@ and stmtordec stmtordec locEnv gloEnv structEnv store =
                                                             else stores  
                                                           ( s.Length   ,sign 0 store2)
                                       | _ ->  eval e loc gloEnv structEnv store2
-                                    (loc, setSto store3 loc2 res) 
+                                    (res, setSto store3 loc2 res) 
 
 (* Evaluating micro-C expressions *)
 
-(*
-and typ e locEnv gloEnv structEnv store : typ =  
+
+and typeof e locEnv gloEnv structEnv store : typ =  
     match e with  
-    | CstI i -> TypI  
-    | Var x  -> lookup env x   
-    | Prim(ope, e1, e2) ->   
-      let t1 = typ e1 env  
-      let t2 = typ e2 env  
-      in match (ope, t1, t2) with  
-         | ("*",  TypI, TypI) -> TypI  
-         | ("+",  TypI, TypI) -> TypI  
-         | ("-",  TypI, TypI) -> TypI  
-         | ("=",  TypI, TypI) -> TypB  
-         | ("<",  TypI, TypI) -> TypB  
-         | ("&&", TypB, TypB) -> TypB  
-         | _   -> failwith "unknown primitive, or type error"  
-*)
+    | ToInt e -> TypI
+    | ToChar e -> TypC
+    | ToFloat e -> TypF
+    | CreateI(s,hex) -> TypI
+    | Access acc     -> let (loc, store1) = access acc locEnv gloEnv structEnv store
+                        (getSto store1 loc, store1) 
+    | Self(acc,opt,e)-> let typ1 =  typeof e locEnv gloEnv structEnv store
+                        match opt with
+                        | "*"  ->  let res = i1 * i2
+                                   (res, setSto store2 loc res)
+                        | "+B"  -> let res = i1 + i2
+                                   (res, setSto store2 loc res)
+                        | "-B"  -> let res = i1 - i2  
+                                   (res, setSto store2 loc res)
+                        | "+"  ->  let res = i1 + i2
+                                   (i1, setSto store2 loc res)
+                        | "-"  ->  let res = i1 - i2  
+                                   (i1, setSto store2 loc res)
+                        | "/"  ->  let res = i1 / i2  
+                                   (res, setSto store2 loc res)
+                        | "%"  ->  let res = i1 % i2  
+                                   (res, setSto store2 loc res)
+                        | _    -> failwith ("unknown primitive " + opt) 
+    | Assign(acc, e) -> typeof e locEnv gloEnv structEnv store
+    | CstI i         -> TypI
+    | ConstNull      -> TypI
+    | ConstBool b    -> TypB
+    | ConstString s  -> TypS
+    | ConstFloat f   -> TypF
+    | ConstChar c    -> TypC
+    | Addr acc       -> match acc with 
+                       | AccVar x           -> (lookup (fst locEnv) x, store)
+                       | AccDeref e         -> eval e locEnv gloEnv structEnv store
+                       | AccIndex(acc, idx) -> 
+                              let (a, store1) = access acc locEnv gloEnv structEnv store
+                              let aval = getSto store1 a
+                              let (i, store2) = eval idx locEnv gloEnv structEnv store1
+                              (aval + i, store2) 
+                       | AccStruct(acc,acc2) ->  
+                              let (a, store1) = access acc locEnv gloEnv structEnv store
+                              let aval = getSto store1 a
+                              let list = structEnv.[aval]
+                              let param =
+                                  match list with 
+                                  | (string,paramdecs,int) -> paramdecs
+                              let rec lookuptyp list index = 
+                                  match list with
+                                  | [] -> failwith("can not find ")
+                                  | (typ , name ) ::tail -> match acc2 with
+                                                            | AccVar x -> if x = name then typ
+                                                                                      else lookuptyp tail ( index + ( allsize typ) )
+                                                            | AccIndex( acc3, idx ) ->  match acc3 with
+                                                                                        | AccVar y ->  if name = y then 
+                                                                                                       match typ with 
+                                                                                                       | TypA (arrtyp) -> arrtyp
+                                                                                                       else lookuptyp tail (index + (allsize typ))
+    | Println(acc)   -> let typ = typeof e1 locEnv gloEnv structEnv store 
+                        typ = TypS then TypS 
+                                   else failwith("type error")
+    | Print(op,e1)   -> let typ = typeof e1 locEnv gloEnv structEnv store 
+                        match op with
+                        | "%c"   -> if typ = TypC then TypC
+                                                  else failwith("type error")
+                        | "%d"   -> if typ = TypI then TypI
+                                                  else failwith("type error")  
+                        | "%f"   -> if typ = TypF then TypF
+                                                  else failwith("type error")                
+    | PrintHex(hex,e1)-> let typ = typeof e1 locEnv gloEnv structEnv store 
+                         if typ = TypI then TypI
+                                       else failwith("type error")
+    | Prim1(ope, e1) ->
+      let typ = typeof e1 locEnv gloEnv structEnv store
+          match (ope, typ) with
+          | ("!" ,TypI)    -> TypB
+          | ("!" ,TypB)    -> TypB
+          | _        -> failwith ("unknown primitive " + ope) 
+    | Prim2(ope, e1, e2) ->
+      let typ1 = typeof e1 locEnv gloEnv structEnv store
+      let typ2 = typeof e2 locEnv gloEnv structEnv store
+      match (ope, typ1, typ2) with  
+      | ("*",  TypI, TypI) -> TypI  
+      | ("+",  TypI, TypI) -> TypI
+      | ("+",  TypF, TypF) -> TypF  
+      | ("+",  TypI, TypC) -> TypC
+      | ("+",  TypC, TypI) -> TypC  
+      | ("-",  TypI, TypI) -> TypI
+      | ("-",  TypF, TypF) -> TypF  
+      | ("-",  TypC, TypI) -> TypC
+      | ("==", TypI, TypI) -> TypB
+      | ("==", TypB, TypB) -> TypB  
+      | ("==", TypC, TypC) -> TypB 
+      | ("==", TypF, TypF) -> TypB
+      | ("!=", TypI, TypI) -> TypB
+      | ("!=", TypB, TypB) -> TypB  
+      | ("!=", TypC, TypC) -> TypB 
+      | ("!=", TypF, TypF) -> TypB  
+      | ("<=", TypI, TypI) -> TypB
+      | ("<=", TypB, TypB) -> TypB  
+      | ("<=", TypC, TypC) -> TypB 
+      | ("<=", TypF, TypF) -> TypB 
+      | ("<", TypI, TypI) -> TypB
+      | ("<", TypB, TypB) -> TypB  
+      | ("<", TypC, TypC) -> TypB 
+      | ("<", TypF, TypF) -> TypB 
+      | (">=", TypI, TypI) -> TypB
+      | (">=", TypB, TypB) -> TypB  
+      | (">=", TypC, TypC) -> TypB 
+      | (">=", TypF, TypF) -> TypB 
+      | (">", TypI, TypI) -> TypB
+      | (">", TypB, TypB) -> TypB  
+      | (">", TypC, TypC) -> TypB 
+      | (">", TypF, TypF) -> TypB 
+      | _   -> failwith "unknown primitive, or type error"  
+    | Prim3( e1, e2 , e3) ->
+         let typ1 = typeof e1 locEnv gloEnv structEnv store
+         let typ2 = typeof e2 locEnv gloEnv structEnv store
+         let typ3 = typeof e2 locEnv gloEnv structEnv store
+         if typ1 = TypB then 
+                        let (i1, store1) = eval e1 locEnv gloEnv structEnv store
+                        if i1 <> 0 then typ3
+                                  else typ2
+                        else typ3
+         elif typ1 = TypI then 
+                        let (i1, store1) = eval e1 locEnv gloEnv structEnv store
+                        if i1 <> 0 then typ3
+                                  else typ2
+         else failwith("type error")
+    | Andalso(e1, e2) ->
+       let typ1 = typeof e1 locEnv gloEnv structEnv store
+       let typ2 = typeof e2 locEnv gloEnv structEnv store 
+       match (typ1,typ2) with
+       | (TypB,TypB) -> TypB
+       | (TypI,TypI) -> TypB
+       | (TypB,TypI) -> TypB
+       | (TypI,TypB) -> TypB
+    | Orelse(e1, e2) -> 
+        let typ1 = typeof e1 locEnv gloEnv structEnv store
+        let typ2 = typeof e2 locEnv gloEnv structEnv store 
+        match (typ1,typ2) with
+        | (TypB,TypB) -> TypB
+        | (TypI,TypI) -> TypB
+        | (TypB,TypI) -> TypB
+        | (TypI,TypB) -> TypB
+    | Call(f, es) ->  TypI
+    
+
 and eval e locEnv gloEnv structEnv store : int  * store = 
 
     match e with

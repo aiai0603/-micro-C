@@ -1,4 +1,4 @@
-import cubyType.*;
+import  Type.*;
 import exception.ImcompatibleTypeError;
 import exception.OperatorError;
 
@@ -17,7 +17,7 @@ public class Machine {
         }
 
 //        args = new String[1];
-//        args[0] = "D:\\Yuby\\Cuby\\testing\\ex(float).out";
+//        args[0] = "D:\\Yuby\\ \\testing\\ex(float).out";
 ////        args[1] = "Hello";
 ////        args[2] = "1.2";
 ////        args[3] = "100";
@@ -29,52 +29,52 @@ public class Machine {
     static void execute(String[] args, boolean trace) throws FileNotFoundException, IOException, OperatorError, ImcompatibleTypeError {
         ArrayList<Integer> program = readfile(args[0]);
 
-        CubyBaseType[] stack = new CubyBaseType[STACKSIZE];
+         BaseType[] stack = new  BaseType[STACKSIZE];
 
-        CubyBaseType[] inputArgs = new CubyBaseType[args.length - 1];
+         BaseType[] inputArgs = new  BaseType[args.length - 1];
 
         for (int i = 1; i < args.length; i++) {
             if(Pattern.compile("(?i)[a-z]").matcher(args[i]).find()){
                 char[] input = args[i].toCharArray();
-                CubyCharType[] array = new CubyCharType[input.length];
+                 CharType[] array = new  CharType[input.length];
                 for(int j = 0; j < input.length; ++j) {
-                    array[j] = new CubyCharType(input[j]);
+                    array[j] = new  CharType(input[j]);
                 }
-                inputArgs[i-1] = new CubyArrayType(array);
+                inputArgs[i-1] = new  ArrayType(array);
             }
             else if(args[i].contains(".")){
-                inputArgs[i-1] = new CubyFloatType(new Float(args[i]).floatValue());
+                inputArgs[i-1] = new  FloatType(new Float(args[i]).floatValue());
             }
             else {
-                inputArgs[i-1] = new CubyIntType(new Integer(args[i]).intValue());
+                inputArgs[i-1] = new  IntType(new Integer(args[i]).intValue());
             }
         }
 
 
 //        for(int i = 0; i < inputArgs.length; ++i){
-//            if(inputArgs[i] instanceof CubyArrayType){
-//                CubyBaseType[] a = ((CubyArrayType)inputArgs[i]).getValue();
+//            if(inputArgs[i] instanceof  ArrayType){
+//                 BaseType[] a = (( ArrayType)inputArgs[i]).getValue();
 //                for(int j = 0; j < a.length; ++j){
-//                    if(a[j] instanceof CubyCharType){
-//                        System.out.print(((CubyCharType)a[j]).getValue());
+//                    if(a[j] instanceof  CharType){
+//                        System.out.print((( CharType)a[j]).getValue());
 //                    }
-//                    else if(a[j] instanceof CubyIntType){
-//                        System.out.print(((CubyIntType)a[j]).getValue());
+//                    else if(a[j] instanceof  IntType){
+//                        System.out.print((( IntType)a[j]).getValue());
 //                    }
-//                    else if(a[j] instanceof CubyFloatType){
-//                        System.out.print(((CubyFloatType)a[j]).getValue());
+//                    else if(a[j] instanceof  FloatType){
+//                        System.out.print((( FloatType)a[j]).getValue());
 //                    }
 //                }
 //                System.out.println();
 //            }
-//            else if(inputArgs[i] instanceof CubyCharType){
-//                System.out.println(((CubyCharType)inputArgs[i]).getValue());
+//            else if(inputArgs[i] instanceof  CharType){
+//                System.out.println((( CharType)inputArgs[i]).getValue());
 //            }
-//            else if(inputArgs[i] instanceof CubyIntType){
-//                System.out.println(((CubyIntType)inputArgs[i]).getValue());
+//            else if(inputArgs[i] instanceof  IntType){
+//                System.out.println((( IntType)inputArgs[i]).getValue());
 //            }
-//            else if(inputArgs[i] instanceof CubyFloatType){
-//                System.out.println(((CubyFloatType)inputArgs[i]).getValue());
+//            else if(inputArgs[i] instanceof  FloatType){
+//                System.out.println((( FloatType)inputArgs[i]).getValue());
 //            }
 //
 //        }
@@ -86,7 +86,7 @@ public class Machine {
     }
 
 
-    private static int execCode(ArrayList<Integer> program, CubyBaseType[] stack, CubyBaseType[] inputArgs, boolean trace) throws ImcompatibleTypeError, OperatorError {
+    private static int execCode(ArrayList<Integer> program,  BaseType[] stack,  BaseType[] inputArgs, boolean trace) throws ImcompatibleTypeError, OperatorError {
         int bp = -999;
         int sp = -1;
         int pc = 0;
@@ -96,11 +96,11 @@ public class Machine {
                 printSpPc(stack, bp, sp, program, pc);
             switch (program.get(pc++)) {
                 case Instruction.CSTI:
-                    stack[sp + 1] = new CubyIntType(program.get(pc++)); sp++; break;
+                    stack[sp + 1] = new  IntType(program.get(pc++)); sp++; break;
                 case Instruction.CSTF:
-                    stack[sp + 1] = new CubyFloatType(Float.intBitsToFloat(program.get(pc++))); sp++; break;
+                    stack[sp + 1] = new  FloatType(Float.intBitsToFloat(program.get(pc++))); sp++; break;
                 case Instruction.CSTC:
-                    stack[sp + 1] = new CubyCharType((char)(program.get(pc++).intValue())); sp++; break;
+                    stack[sp + 1] = new  CharType((char)(program.get(pc++).intValue())); sp++; break;
                 case Instruction.ADD: {
                     stack[sp - 1] = binaryOperator(stack[sp-1], stack[sp], "+");
                     sp--;
@@ -118,19 +118,19 @@ public class Machine {
                     break;
                 }
                 case Instruction.DIV:
-                    if(((CubyIntType)stack[sp]).getValue()==0)
+                    if((( IntType)stack[sp]).getValue()==0)
                     {
                         System.out.println("hr:"+hr+" exception:"+1);
-                        while (hr != -1 && ((CubyIntType)stack[hr]).getValue() != 1 )
+                        while (hr != -1 && (( IntType)stack[hr]).getValue() != 1 )
                         {
-                            hr = ((CubyIntType)stack[hr+2]).getValue();
-                            System.out.println("hr:"+hr+" exception:"+new CubyIntType(program.get(pc)).getValue());
+                            hr = (( IntType)stack[hr+2]).getValue();
+                            System.out.println("hr:"+hr+" exception:"+new  IntType(program.get(pc)).getValue());
                         }
                             
                         if (hr != -1) { 
                             sp = hr-1;    
-                            pc = ((CubyIntType)stack[hr+1]).getValue();
-                            hr = ((CubyIntType)stack[hr+2]).getValue();    
+                            pc = (( IntType)stack[hr+1]).getValue();
+                            hr = (( IntType)stack[hr+2]).getValue();    
                         } else {
                             System.out.print(hr+"not find exception");
                             return sp;
@@ -156,12 +156,12 @@ public class Machine {
                     break;
                 case Instruction.NOT: {
                     Object result = null;
-                    if(stack[sp] instanceof CubyFloatType){
-                        result = ((CubyFloatType)stack[sp]).getValue();
-                    }else if (stack[sp] instanceof CubyIntType){
-                        result = ((CubyIntType)stack[sp]).getValue();
+                    if(stack[sp] instanceof  FloatType){
+                        result = (( FloatType)stack[sp]).getValue();
+                    }else if (stack[sp] instanceof  IntType){
+                        result = (( IntType)stack[sp]).getValue();
                     }
-                    stack[sp] = (Float.compare(new Float(result.toString()), 0.0f) == 0 ? new CubyIntType(1) : new CubyIntType(0));
+                    stack[sp] = (Float.compare(new Float(result.toString()), 0.0f) == 0 ? new  IntType(1) : new  IntType(0));
                     break;
                 }
                 case Instruction.DUP:
@@ -169,17 +169,17 @@ public class Machine {
                     sp++;
                     break;
                 case Instruction.SWAP: {
-                    CubyBaseType tmp = stack[sp];  stack[sp] = stack[sp-1];  stack[sp-1] = tmp;
+                     BaseType tmp = stack[sp];  stack[sp] = stack[sp-1];  stack[sp-1] = tmp;
                     break;
                 }
                 case Instruction.LDI:
-                    stack[sp] = stack[((CubyIntType)stack[sp]).getValue()]; break;
+                    stack[sp] = stack[(( IntType)stack[sp]).getValue()]; break;
                 case Instruction.STI:
-                    stack[((CubyIntType)stack[sp-1]).getValue()] = stack[sp]; stack[sp-1] = stack[sp]; sp--; break;
+                    stack[(( IntType)stack[sp-1]).getValue()] = stack[sp]; stack[sp-1] = stack[sp]; sp--; break;
                 case Instruction.GETBP:
-                    stack[sp+1] = new CubyIntType(bp); sp++; break;
+                    stack[sp+1] = new  IntType(bp); sp++; break;
                 case Instruction.GETSP:
-                    stack[sp+1] = new CubyIntType(sp); sp++; break;
+                    stack[sp+1] = new  IntType(sp); sp++; break;
                 case Instruction.INCSP:
                     sp = sp + program.get(pc++); break;
                 case Instruction.GOTO:
@@ -187,10 +187,10 @@ public class Machine {
                 case Instruction.IFZERO: {
                     Object result = null;
                     int index = sp--;
-                    if(stack[index] instanceof CubyIntType){
-                        result = ((CubyIntType)stack[index]).getValue();
-                    }else if(stack[index] instanceof CubyFloatType){
-                        result = ((CubyFloatType)stack[index]).getValue();
+                    if(stack[index] instanceof  IntType){
+                        result = (( IntType)stack[index]).getValue();
+                    }else if(stack[index] instanceof  FloatType){
+                        result = (( FloatType)stack[index]).getValue();
                     }
                     pc = (Float.compare(new Float(result.toString()), 0.0f) == 0 ? program.get(pc) : pc + 1);
                     break;
@@ -198,10 +198,10 @@ public class Machine {
                 case Instruction.IFNZRO: {
                     Object result = null;
                     int index = sp--;
-                    if (stack[index] instanceof CubyIntType) {
-                        result = ((CubyIntType) stack[index]).getValue();
-                    } else if (stack[index] instanceof CubyFloatType) {
-                        result = ((CubyFloatType) stack[index]).getValue();
+                    if (stack[index] instanceof  IntType) {
+                        result = (( IntType) stack[index]).getValue();
+                    } else if (stack[index] instanceof  FloatType) {
+                        result = (( FloatType) stack[index]).getValue();
                     }
                     pc = (Float.compare(new Float(result.toString()), 0.0f) != 0 ? program.get(pc) : pc + 1);
                     break;
@@ -210,8 +210,8 @@ public class Machine {
                     int argc = program.get(pc++);
                     for (int i=0; i<argc; i++)
                         stack[sp-i+2] = stack[sp-i];
-                    stack[sp-argc+1] = new CubyIntType(pc+1); sp++;
-                    stack[sp-argc+1] = new CubyIntType(bp);   sp++;
+                    stack[sp-argc+1] = new  IntType(pc+1); sp++;
+                    stack[sp-argc+1] = new  IntType(bp);   sp++;
                     bp = sp+1-argc;
                     pc = program.get(pc);
                     break;
@@ -224,27 +224,27 @@ public class Machine {
                     sp = sp - pop; pc = program.get(pc);
                 } break;
                 case Instruction.RET: {
-                    CubyBaseType res = stack[sp];
-                    sp = sp - program.get(pc); bp = ((CubyIntType)stack[--sp]).getValue(); pc = ((CubyIntType)stack[--sp]).getValue();
+                    BaseType res = stack[sp];
+                    sp = sp - program.get(pc); bp = (( IntType)stack[--sp]).getValue(); pc = (( IntType)stack[--sp]).getValue();
                     stack[sp] = res;
                 } break;
                 case Instruction.PRINTI: {
                     Object result;
-                    if(stack[sp] instanceof CubyIntType){
-                        result = ((CubyIntType)stack[sp]).getValue();
-                    }else if(stack[sp] instanceof CubyFloatType){
-                        result = ((CubyFloatType)stack[sp]).getValue();
+                    if(stack[sp] instanceof IntType){
+                        result = ((IntType)stack[sp]).getValue();
+                    }else if(stack[sp] instanceof FloatType){
+                        result = ((FloatType)stack[sp]).getValue();
                     }else {
-                        result = ((CubyCharType)stack[sp]).getValue();
+                        result = ((CharType)stack[sp]).getValue();
                     }
 
                     System.out.print(String.valueOf(result) + " ");
                     break;
                 }
                 case Instruction.PRINTC:
-                    System.out.print((((CubyCharType)stack[sp])).getValue()); break;
+                    System.out.print((((CharType)stack[sp])).getValue()); break;
                 case Instruction.PRINTF:
-                    System.out.print((((CubyFloatType)stack[sp])).getValue()); break;
+                    System.out.print((((FloatType)stack[sp])).getValue()); break;
                 case Instruction.LDARGS:
                     for (int i=0; i < inputArgs.length; i++) // Push commandline arguments
                         stack[++sp] = inputArgs[i];
@@ -252,29 +252,29 @@ public class Machine {
                 case Instruction.STOP:
                     return sp;
                 case Instruction.PUSHHR:{
-                    stack[++sp] = new CubyIntType(program.get(pc++));    //exn
+                    stack[++sp] = new IntType(program.get(pc++));    //exn
                     int tmp = sp;       //exn address
                     sp++;
-                    stack[sp++] = new CubyIntType(program.get(pc++));   //jump address
-                    stack[sp] = new CubyIntType(hr);
+                    stack[sp++] = new IntType(program.get(pc++));   //jump address
+                    stack[sp] = new IntType(hr);
                     hr = tmp;
                     break;
                 }
                 case Instruction.POPHR:
-                    hr = ((CubyIntType)stack[sp--]).getValue();sp-=2;break;
+                    hr = (( IntType)stack[sp--]).getValue();sp-=2;break;
                 case Instruction.THROW:
-                    System.out.println("hr:"+hr+" exception:"+new CubyIntType(program.get(pc)).getValue());
+                    System.out.println("hr:"+hr+" exception:"+new  IntType(program.get(pc)).getValue());
 
-                    while (hr != -1 && ((CubyIntType)stack[hr]).getValue() != program.get(pc) )
+                    while (hr != -1 && (( IntType)stack[hr]).getValue() != program.get(pc) )
                     {
-                        hr = ((CubyIntType)stack[hr+2]).getValue(); //find exn address
-                        System.out.println("hr:"+hr+" exception:"+new CubyIntType(program.get(pc)).getValue());
+                        hr = (( IntType)stack[hr+2]).getValue(); //find exn address
+                        System.out.println("hr:"+hr+" exception:"+new  IntType(program.get(pc)).getValue());
                     }
                         
                     if (hr != -1) { // Found a handler for exn
                         sp = hr-1;    // remove stack after hr
-                        pc = ((CubyIntType)stack[hr+1]).getValue();
-                        hr = ((CubyIntType)stack[hr+2]).getValue(); // with current handler being hr     
+                        pc = (( IntType)stack[hr+1]).getValue();
+                        hr = (( IntType)stack[hr+2]).getValue(); // with current handler being hr     
                     } else {
                         System.out.print(hr+"not find exception");
                         return sp;
@@ -292,51 +292,51 @@ public class Machine {
 
     }
 
-    public static CubyBaseType binaryOperator(CubyBaseType lhs, CubyBaseType rhs, String operator) throws ImcompatibleTypeError, OperatorError {
+    public static  BaseType binaryOperator( BaseType lhs,  BaseType rhs, String operator) throws ImcompatibleTypeError, OperatorError {
         Object left;
         Object right;
         int flag = 0;
-        if (lhs instanceof CubyFloatType) {
-            left = ((CubyFloatType) lhs).getValue();
+        if (lhs instanceof  FloatType) {
+            left = (( FloatType) lhs).getValue();
             flag = 1;
-        } else if (lhs instanceof CubyIntType) {
-            left = ((CubyIntType) lhs).getValue();
+        } else if (lhs instanceof  IntType) {
+            left = (( IntType) lhs).getValue();
         } else {
             throw new ImcompatibleTypeError("ImcompatibleTypeError: Left type is not int or float");
         }
 
-        if (rhs instanceof CubyFloatType) {
-            right = ((CubyFloatType) rhs).getValue();
+        if (rhs instanceof  FloatType) {
+            right = (( FloatType) rhs).getValue();
             flag = 1;
-        } else if (rhs instanceof CubyIntType) {
-            right = ((CubyIntType) rhs).getValue();
+        } else if (rhs instanceof  IntType) {
+            right = (( IntType) rhs).getValue();
         } else {
             throw new ImcompatibleTypeError("ImcompatibleTypeError: Right type is not int or float");
         }
-        CubyBaseType result = null;
+         BaseType result = null;
 
         switch(operator){
             case "+":{
                 if (flag == 1) {
-                    result =  new CubyFloatType(Float.parseFloat(String.valueOf(left)) + Float.parseFloat(String.valueOf(right)));
+                    result =  new  FloatType(Float.parseFloat(String.valueOf(left)) + Float.parseFloat(String.valueOf(right)));
                 } else {
-                    result = new CubyIntType(Integer.parseInt(String.valueOf(left)) + Integer.parseInt(String.valueOf(right)));
+                    result = new  IntType(Integer.parseInt(String.valueOf(left)) + Integer.parseInt(String.valueOf(right)));
                 }
                 break;
             }
             case "-":{
                 if (flag == 1) {
-                    result = new CubyFloatType(Float.parseFloat(String.valueOf(left)) - Float.parseFloat(String.valueOf(right)));
+                    result = new  FloatType(Float.parseFloat(String.valueOf(left)) - Float.parseFloat(String.valueOf(right)));
                 } else {
-                    result = new CubyIntType(Integer.parseInt(String.valueOf(left)) - Integer.parseInt(String.valueOf(right)));
+                    result = new  IntType(Integer.parseInt(String.valueOf(left)) - Integer.parseInt(String.valueOf(right)));
                 }
                 break;
             }
             case "*":{
                 if (flag == 1) {
-                    result = new CubyFloatType(Float.parseFloat(String.valueOf(left)) * Float.parseFloat(String.valueOf(right)));
+                    result = new  FloatType(Float.parseFloat(String.valueOf(left)) * Float.parseFloat(String.valueOf(right)));
                 } else {
-                    result = new CubyIntType(Integer.parseInt(String.valueOf(left)) * Integer.parseInt(String.valueOf(right)));
+                    result = new  IntType(Integer.parseInt(String.valueOf(left)) * Integer.parseInt(String.valueOf(right)));
                 }
                 break;
             }
@@ -345,9 +345,9 @@ public class Machine {
                     throw new OperatorError("OpeatorError: Divisor can't not be zero");
                 }
                 if (flag == 1) {
-                    result = new CubyFloatType(Float.parseFloat(String.valueOf(left)) / Float.parseFloat(String.valueOf(right)));
+                    result = new  FloatType(Float.parseFloat(String.valueOf(left)) / Float.parseFloat(String.valueOf(right)));
                 } else {
-                    result = new CubyIntType(Integer.parseInt(String.valueOf(left)) / Integer.parseInt(String.valueOf(right)));
+                    result = new  IntType(Integer.parseInt(String.valueOf(left)) / Integer.parseInt(String.valueOf(right)));
                 }
                 break;
             }
@@ -355,24 +355,24 @@ public class Machine {
                 if (flag == 1) {
                     throw new OperatorError("OpeatorError: Float can't mod");
                 } else {
-                    result = new CubyIntType(Integer.parseInt(String.valueOf(left)) % Integer.parseInt(String.valueOf(right)));
+                    result = new  IntType(Integer.parseInt(String.valueOf(left)) % Integer.parseInt(String.valueOf(right)));
                 }
                 break;
             }
             case "==":{
                 if (flag == 1) {
                     if((float) left == (float) right){
-                        result = new CubyIntType(1);
+                        result = new  IntType(1);
                     }
                     else{
-                        result = new CubyIntType(0);
+                        result = new  IntType(0);
                     }
                 } else {
                     if((int) left == (int) right){
-                        result = new CubyIntType(1);
+                        result = new  IntType(1);
                     }
                     else{
-                        result = new CubyIntType(0);
+                        result = new  IntType(0);
                     }
                 }
                 break;
@@ -380,17 +380,17 @@ public class Machine {
             case "<":{
                 if (flag == 1) {
                     if((float) left < (float) right){
-                        result = new CubyIntType(1);
+                        result = new  IntType(1);
                     }
                     else{
-                        result = new CubyIntType(0);
+                        result = new  IntType(0);
                     }
                 } else {
                     if((int) left < (int) right){
-                        result = new CubyIntType(1);
+                        result = new  IntType(1);
                     }
                     else{
-                        result = new CubyIntType(0);
+                        result = new  IntType(0);
                     }
                 }
                 break;
@@ -438,16 +438,16 @@ public class Machine {
     }
 
 
-    private static void printSpPc(CubyBaseType[] stack, int bp, int sp, ArrayList<Integer> program, int pc) {
+    private static void printSpPc( BaseType[] stack, int bp, int sp, ArrayList<Integer> program, int pc) {
         System.out.print("[ ");
         for (int i = 0; i <= sp; i++) {
             Object result = null;
-            if(stack[i] instanceof CubyIntType){
-                result = ((CubyIntType)stack[i]).getValue();
-            }else if(stack[i] instanceof CubyFloatType){
-                result = ((CubyFloatType)stack[i]).getValue();
-            }else if(stack[i] instanceof CubyCharType){
-                result = ((CubyCharType)stack[i]).getValue();
+            if(stack[i] instanceof  IntType){
+                result = (( IntType)stack[i]).getValue();
+            }else if(stack[i] instanceof  FloatType){
+                result = (( FloatType)stack[i]).getValue();
+            }else if(stack[i] instanceof  CharType){
+                result = (( CharType)stack[i]).getValue();
             }
             System.out.print(String.valueOf(result) + " ");
         }

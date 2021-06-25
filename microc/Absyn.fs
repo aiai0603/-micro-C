@@ -8,6 +8,7 @@
 module Absyn
 
 type typ =
+  | TypB 
   | TypF
   | TypI                             (* Type int                    *)
   | TypC                             (* Type char                   *)
@@ -20,6 +21,7 @@ type typ =
 and expr =    
   | CreateI of string * int
   | CstI of int   (*constant int*)
+  | ConstBool of bool
   | ConstString of string (*constant string*)
   | ConstChar of char (*constant char*) 
   | ConstFloat of float32
@@ -40,6 +42,9 @@ and expr =
   | Orelse of expr * expr            (* Sequential or               *)
   | Call of string * expr list       (* Function call f(...)        *)
   | PrintHex of int * expr
+  | Typeof of expr
+  | Sizeof of expr  
+  
   
   
                                                                    
@@ -70,7 +75,7 @@ and stmt =
   | Throw of Exception
   | Try of stmt * stmt list
   | Catch of expr * stmt
-  
+ 
 and Exception = 
     | Exception of string
                                                                    

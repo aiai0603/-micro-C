@@ -26,6 +26,7 @@ type token =
   | LT
   | GE
   | LE
+  | BOOL
   | PLUS
   | MINUS
   | TIMES
@@ -42,6 +43,8 @@ type token =
   | TOINT
   | TOFLOAT
   | POINT
+  | SIZEOF
+  | TYPEOF
   | CHAR
   | ELSE
   | IF
@@ -73,8 +76,8 @@ type token =
   | CSTCHAR of (char)
   | CSTSTRING of (string)
   | NAME of (string)
+  | CSTBOOL of (bool)
   | CSTINT of (int)
-  | CSTBOOL of (int)
 type tokenId = 
     | TOKEN_EOF
     | TOKEN_LPAR
@@ -101,6 +104,7 @@ type tokenId =
     | TOKEN_LT
     | TOKEN_GE
     | TOKEN_LE
+    | TOKEN_BOOL
     | TOKEN_PLUS
     | TOKEN_MINUS
     | TOKEN_TIMES
@@ -117,6 +121,8 @@ type tokenId =
     | TOKEN_TOINT
     | TOKEN_TOFLOAT
     | TOKEN_POINT
+    | TOKEN_SIZEOF
+    | TOKEN_TYPEOF
     | TOKEN_CHAR
     | TOKEN_ELSE
     | TOKEN_IF
@@ -148,8 +154,8 @@ type tokenId =
     | TOKEN_CSTCHAR
     | TOKEN_CSTSTRING
     | TOKEN_NAME
-    | TOKEN_CSTINT
     | TOKEN_CSTBOOL
+    | TOKEN_CSTINT
     | TOKEN_end_of_input
     | TOKEN_error
 type nonTerminalId = 
@@ -178,6 +184,7 @@ type nonTerminalId =
     | NONTERM_Exprs1
     | NONTERM_StmtCase
     | NONTERM_StmtPattern
+    | NONTERM_ConstBool
     | NONTERM_Const
     | NONTERM_ConstString
     | NONTERM_ConstFloat

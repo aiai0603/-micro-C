@@ -52,20 +52,20 @@
           }
         }
       },
-      "FsLexYacc/10.0.0": {
+      "FsLexYacc/10.2.0": {
         "type": "package",
         "dependencies": {
-          "FSharp.Core": "4.3.4",
-          "FsLexYacc.Runtime": "[10.0.0, 10.1.0)"
+          "FSharp.Core": "4.5.2",
+          "FsLexYacc.Runtime": "[10.2.0, 10.3.0)"
         },
         "build": {
           "build/FsLexYacc.targets": {}
         }
       },
-      "FsLexYacc.Runtime/10.0.0": {
+      "FsLexYacc.Runtime/10.2.0": {
         "type": "package",
         "dependencies": {
-          "FSharp.Core": "4.3.4"
+          "FSharp.Core": "4.5.2"
         },
         "compile": {
           "lib/netstandard2.0/FsLexYacc.Runtime.dll": {}
@@ -104,106 +104,58 @@
         "lib/netstandard2.0/zh-Hant/FSharp.Core.resources.dll"
       ]
     },
-    "FsLexYacc/10.0.0": {
-      "sha512": "YIaA8wBIrl2EzMPN3VqoaPo5K1+xTmROIUejTDrxqDdBkcNu145UBUhVchMiAWQda6NS5esJIX2Jh83ChKJzzA==",
+    "FsLexYacc/10.2.0": {
+      "sha512": "q7mhuEMm8rvFAJ9jaH1atYCRN96tMbjHarYIDooeMKFCbUuqvep+vA2ijGhA06GZ5BG+jg4TjG6dt/4gR2qHHA==",
       "type": "package",
-      "path": "fslexyacc/10.0.0",
+      "path": "fslexyacc/10.2.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "build/FsLexYacc.targets",
-        "build/fslex/net46/App.config",
-        "build/fslex/net46/FSharp.Core.dll",
-        "build/fslex/net46/FsLexYacc.Runtime.dll",
-        "build/fslex/net46/cs/FSharp.Core.resources.dll",
-        "build/fslex/net46/de/FSharp.Core.resources.dll",
-        "build/fslex/net46/en/FSharp.Core.resources.dll",
-        "build/fslex/net46/es/FSharp.Core.resources.dll",
-        "build/fslex/net46/fr/FSharp.Core.resources.dll",
-        "build/fslex/net46/fslex.exe",
-        "build/fslex/net46/fslex.exe.config",
-        "build/fslex/net46/fslex.pdb",
-        "build/fslex/net46/it/FSharp.Core.resources.dll",
-        "build/fslex/net46/ja/FSharp.Core.resources.dll",
-        "build/fslex/net46/ko/FSharp.Core.resources.dll",
-        "build/fslex/net46/pl/FSharp.Core.resources.dll",
-        "build/fslex/net46/pt-BR/FSharp.Core.resources.dll",
-        "build/fslex/net46/ru/FSharp.Core.resources.dll",
-        "build/fslex/net46/tr/FSharp.Core.resources.dll",
-        "build/fslex/net46/zh-Hans/FSharp.Core.resources.dll",
-        "build/fslex/net46/zh-Hant/FSharp.Core.resources.dll",
-        "build/fslex/netcoreapp3.0/App.config",
-        "build/fslex/netcoreapp3.0/FSharp.Core.dll",
-        "build/fslex/netcoreapp3.0/FsLexYacc.Runtime.dll",
-        "build/fslex/netcoreapp3.0/cs/FSharp.Core.resources.dll",
-        "build/fslex/netcoreapp3.0/de/FSharp.Core.resources.dll",
-        "build/fslex/netcoreapp3.0/en/FSharp.Core.resources.dll",
-        "build/fslex/netcoreapp3.0/es/FSharp.Core.resources.dll",
-        "build/fslex/netcoreapp3.0/fr/FSharp.Core.resources.dll",
-        "build/fslex/netcoreapp3.0/fslex",
-        "build/fslex/netcoreapp3.0/fslex.deps.json",
-        "build/fslex/netcoreapp3.0/fslex.dll",
-        "build/fslex/netcoreapp3.0/fslex.dll.config",
-        "build/fslex/netcoreapp3.0/fslex.pdb",
-        "build/fslex/netcoreapp3.0/fslex.runtimeconfig.json",
-        "build/fslex/netcoreapp3.0/it/FSharp.Core.resources.dll",
-        "build/fslex/netcoreapp3.0/ja/FSharp.Core.resources.dll",
-        "build/fslex/netcoreapp3.0/ko/FSharp.Core.resources.dll",
-        "build/fslex/netcoreapp3.0/pl/FSharp.Core.resources.dll",
-        "build/fslex/netcoreapp3.0/pt-BR/FSharp.Core.resources.dll",
-        "build/fslex/netcoreapp3.0/ru/FSharp.Core.resources.dll",
-        "build/fslex/netcoreapp3.0/tr/FSharp.Core.resources.dll",
-        "build/fslex/netcoreapp3.0/zh-Hans/FSharp.Core.resources.dll",
-        "build/fslex/netcoreapp3.0/zh-Hant/FSharp.Core.resources.dll",
-        "build/fsyacc/net46/App.config",
-        "build/fsyacc/net46/FSharp.Core.dll",
-        "build/fsyacc/net46/FsLexYacc.Runtime.dll",
-        "build/fsyacc/net46/FsLexYacc.targets",
-        "build/fsyacc/net46/cs/FSharp.Core.resources.dll",
-        "build/fsyacc/net46/de/FSharp.Core.resources.dll",
-        "build/fsyacc/net46/en/FSharp.Core.resources.dll",
-        "build/fsyacc/net46/es/FSharp.Core.resources.dll",
-        "build/fsyacc/net46/fr/FSharp.Core.resources.dll",
-        "build/fsyacc/net46/fsyacc.exe",
-        "build/fsyacc/net46/fsyacc.exe.config",
-        "build/fsyacc/net46/fsyacc.pdb",
-        "build/fsyacc/net46/it/FSharp.Core.resources.dll",
-        "build/fsyacc/net46/ja/FSharp.Core.resources.dll",
-        "build/fsyacc/net46/ko/FSharp.Core.resources.dll",
-        "build/fsyacc/net46/pl/FSharp.Core.resources.dll",
-        "build/fsyacc/net46/pt-BR/FSharp.Core.resources.dll",
-        "build/fsyacc/net46/ru/FSharp.Core.resources.dll",
-        "build/fsyacc/net46/tr/FSharp.Core.resources.dll",
-        "build/fsyacc/net46/zh-Hans/FSharp.Core.resources.dll",
-        "build/fsyacc/net46/zh-Hant/FSharp.Core.resources.dll",
-        "build/fsyacc/netcoreapp3.0/App.config",
-        "build/fsyacc/netcoreapp3.0/FSharp.Core.dll",
-        "build/fsyacc/netcoreapp3.0/FsLexYacc.Runtime.dll",
-        "build/fsyacc/netcoreapp3.0/FsLexYacc.targets",
-        "build/fsyacc/netcoreapp3.0/cs/FSharp.Core.resources.dll",
-        "build/fsyacc/netcoreapp3.0/de/FSharp.Core.resources.dll",
-        "build/fsyacc/netcoreapp3.0/en/FSharp.Core.resources.dll",
-        "build/fsyacc/netcoreapp3.0/es/FSharp.Core.resources.dll",
-        "build/fsyacc/netcoreapp3.0/fr/FSharp.Core.resources.dll",
-        "build/fsyacc/netcoreapp3.0/fsyacc",
-        "build/fsyacc/netcoreapp3.0/fsyacc.deps.json",
-        "build/fsyacc/netcoreapp3.0/fsyacc.dll",
-        "build/fsyacc/netcoreapp3.0/fsyacc.dll.config",
-        "build/fsyacc/netcoreapp3.0/fsyacc.pdb",
-        "build/fsyacc/netcoreapp3.0/fsyacc.runtimeconfig.json",
-        "build/fsyacc/netcoreapp3.0/it/FSharp.Core.resources.dll",
-        "build/fsyacc/netcoreapp3.0/ja/FSharp.Core.resources.dll",
-        "build/fsyacc/netcoreapp3.0/ko/FSharp.Core.resources.dll",
-        "build/fsyacc/netcoreapp3.0/pl/FSharp.Core.resources.dll",
-        "build/fsyacc/netcoreapp3.0/pt-BR/FSharp.Core.resources.dll",
-        "build/fsyacc/netcoreapp3.0/ru/FSharp.Core.resources.dll",
-        "build/fsyacc/netcoreapp3.0/tr/FSharp.Core.resources.dll",
-        "build/fsyacc/netcoreapp3.0/zh-Hans/FSharp.Core.resources.dll",
-        "build/fsyacc/netcoreapp3.0/zh-Hant/FSharp.Core.resources.dll",
-        "fslexyacc.10.0.0.nupkg.sha512",
+        "build/fslex/netcoreapp3.1/FSharp.Core.dll",
+        "build/fslex/netcoreapp3.1/FsLexYacc.Runtime.dll",
+        "build/fslex/netcoreapp3.1/cs/FSharp.Core.resources.dll",
+        "build/fslex/netcoreapp3.1/de/FSharp.Core.resources.dll",
+        "build/fslex/netcoreapp3.1/en/FSharp.Core.resources.dll",
+        "build/fslex/netcoreapp3.1/es/FSharp.Core.resources.dll",
+        "build/fslex/netcoreapp3.1/fr/FSharp.Core.resources.dll",
+        "build/fslex/netcoreapp3.1/fslex.deps.json",
+        "build/fslex/netcoreapp3.1/fslex.dll",
+        "build/fslex/netcoreapp3.1/fslex.pdb",
+        "build/fslex/netcoreapp3.1/fslex.runtimeconfig.json",
+        "build/fslex/netcoreapp3.1/it/FSharp.Core.resources.dll",
+        "build/fslex/netcoreapp3.1/ja/FSharp.Core.resources.dll",
+        "build/fslex/netcoreapp3.1/ko/FSharp.Core.resources.dll",
+        "build/fslex/netcoreapp3.1/pl/FSharp.Core.resources.dll",
+        "build/fslex/netcoreapp3.1/pt-BR/FSharp.Core.resources.dll",
+        "build/fslex/netcoreapp3.1/ru/FSharp.Core.resources.dll",
+        "build/fslex/netcoreapp3.1/tr/FSharp.Core.resources.dll",
+        "build/fslex/netcoreapp3.1/zh-Hans/FSharp.Core.resources.dll",
+        "build/fslex/netcoreapp3.1/zh-Hant/FSharp.Core.resources.dll",
+        "build/fsyacc/netcoreapp3.1/FSharp.Core.dll",
+        "build/fsyacc/netcoreapp3.1/FsLexYacc.Runtime.dll",
+        "build/fsyacc/netcoreapp3.1/FsLexYacc.targets",
+        "build/fsyacc/netcoreapp3.1/cs/FSharp.Core.resources.dll",
+        "build/fsyacc/netcoreapp3.1/de/FSharp.Core.resources.dll",
+        "build/fsyacc/netcoreapp3.1/en/FSharp.Core.resources.dll",
+        "build/fsyacc/netcoreapp3.1/es/FSharp.Core.resources.dll",
+        "build/fsyacc/netcoreapp3.1/fr/FSharp.Core.resources.dll",
+        "build/fsyacc/netcoreapp3.1/fsyacc.deps.json",
+        "build/fsyacc/netcoreapp3.1/fsyacc.dll",
+        "build/fsyacc/netcoreapp3.1/fsyacc.pdb",
+        "build/fsyacc/netcoreapp3.1/fsyacc.runtimeconfig.json",
+        "build/fsyacc/netcoreapp3.1/it/FSharp.Core.resources.dll",
+        "build/fsyacc/netcoreapp3.1/ja/FSharp.Core.resources.dll",
+        "build/fsyacc/netcoreapp3.1/ko/FSharp.Core.resources.dll",
+        "build/fsyacc/netcoreapp3.1/pl/FSharp.Core.resources.dll",
+        "build/fsyacc/netcoreapp3.1/pt-BR/FSharp.Core.resources.dll",
+        "build/fsyacc/netcoreapp3.1/ru/FSharp.Core.resources.dll",
+        "build/fsyacc/netcoreapp3.1/tr/FSharp.Core.resources.dll",
+        "build/fsyacc/netcoreapp3.1/zh-Hans/FSharp.Core.resources.dll",
+        "build/fsyacc/netcoreapp3.1/zh-Hant/FSharp.Core.resources.dll",
+        "fslexyacc.10.2.0.nupkg.sha512",
         "fslexyacc.nuspec",
         "src/FsLexYacc.targets",
-        "src/fslex/App.config",
         "src/fslex/Arg.fs",
         "src/fslex/Arg.fsi",
         "src/fslex/Lexing.fs",
@@ -215,7 +167,6 @@
         "src/fslex/fslexast.fs",
         "src/fslex/fslexlex.fs",
         "src/fslex/fslexpars.fs",
-        "src/fsyacc/App.config",
         "src/fsyacc/Arg.fs",
         "src/fsyacc/Arg.fsi",
         "src/fsyacc/Lexing.fs",
@@ -229,17 +180,15 @@
         "src/fsyacc/fsyaccpars.fs"
       ]
     },
-    "FsLexYacc.Runtime/10.0.0": {
-      "sha512": "dqieKjfd84tOwlT2C7Bk8Y/otGVfYlVkFhAM0d0nADNG6SChdjN06zB+cVqCF0XTS186ntmFKQVwXVk2RcHmEA==",
+    "FsLexYacc.Runtime/10.2.0": {
+      "sha512": "d2+gguRIvsn1e7AycVc0r7L1QWptrnUOvQvJLbgkANcS5SjfM/FRgfUGwfqV2cJo3KOFQB5Mqmda/4YTQkkvdA==",
       "type": "package",
-      "path": "fslexyacc.runtime/10.0.0",
+      "path": "fslexyacc.runtime/10.2.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "fslexyacc.runtime.10.0.0.nupkg.sha512",
+        "fslexyacc.runtime.10.2.0.nupkg.sha512",
         "fslexyacc.runtime.nuspec",
-        "lib/net46/FsLexYacc.Runtime.dll",
-        "lib/net46/FsLexYacc.Runtime.xml",
         "lib/netstandard2.0/FsLexYacc.Runtime.dll",
         "lib/netstandard2.0/FsLexYacc.Runtime.xml"
       ]
@@ -248,7 +197,7 @@
   "projectFileDependencyGroups": {
     "net5.0": [
       "FSharp.Core >= 5.0.0",
-      "FsLexYacc >= 10.0.0"
+      "FsLexYacc >= 10.2.0"
     ]
   },
   "packageFolders": {
@@ -258,9 +207,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\git\\-micro-C\\microc\\microcc.fsproj",
-      "projectName": "microcc",
-      "projectPath": "D:\\git\\-micro-C\\microc\\microcc.fsproj",
+      "projectUniqueName": "D:\\git\\-micro-C\\microc\\interpc.fsproj",
+      "projectName": "interpc",
+      "projectPath": "D:\\git\\-micro-C\\microc\\interpc.fsproj",
       "packagesPath": "C:\\Users\\asus\\.nuget\\packages\\",
       "outputPath": "D:\\git\\-micro-C\\microc\\obj\\",
       "projectStyle": "PackageReference",
@@ -296,7 +245,7 @@
           },
           "FsLexYacc": {
             "target": "Package",
-            "version": "[10.0.0, )",
+            "version": "[10.2.0, )",
             "generatePathProperty": true
           }
         },

@@ -372,6 +372,23 @@ and stmtordec stmtordec locEnv gloEnv structEnv store =
 
 (* Evaluating micro-C expressions *)
 
+(*
+and typ e locEnv gloEnv structEnv store : typ =  
+    match e with  
+    | CstI i -> TypI  
+    | Var x  -> lookup env x   
+    | Prim(ope, e1, e2) ->   
+      let t1 = typ e1 env  
+      let t2 = typ e2 env  
+      in match (ope, t1, t2) with  
+         | ("*",  TypI, TypI) -> TypI  
+         | ("+",  TypI, TypI) -> TypI  
+         | ("-",  TypI, TypI) -> TypI  
+         | ("=",  TypI, TypI) -> TypB  
+         | ("<",  TypI, TypI) -> TypB  
+         | ("&&", TypB, TypB) -> TypB  
+         | _   -> failwith "unknown primitive, or type error"  
+*)
 and eval e locEnv gloEnv structEnv store : int  * store = 
 
     match e with
@@ -430,6 +447,10 @@ and eval e locEnv gloEnv structEnv store : int  * store =
                         (res, setSto store2 loc res) 
     | CstI i         -> (i, store)
     | ConstNull      -> (0 ,store)
+    | ConstBool b    -> let res  = 
+                            if b = false then 0 
+                                         else 1
+                        (res,store)
     | ConstString s  -> (s.Length,store)
     | ConstFloat f   -> (float2BitInt f,store)
     | ConstChar c    -> ((int c), store)

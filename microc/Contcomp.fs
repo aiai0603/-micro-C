@@ -447,11 +447,11 @@ and cExpr (e : expr) (varEnv : VarEnv) (funEnv : FunEnv) (lablist : LabEnv) (str
             (match ope with
             | "+" -> 
                 let ass = Assign (acc,Prim2("+",Access acc, e))
-                let C1 = cExpr ass varEnv funEnv lablist structEnv C
+                let C1 = cExpr ass varEnv funEnv lablist structEnv (CSTI 1 :: SUB :: C)
                 (addINCSP -1 C1)
             | "-" ->
                 let ass = Assign (acc,Prim2("-",Access acc, e))
-                let C1 = cExpr ass varEnv funEnv lablist structEnv C
+                let C1 = cExpr ass varEnv funEnv lablist structEnv (CSTI 1 :: ADD :: C)
                 (addINCSP -1 C1)
             | "+B" -> 
                 let ass = Assign (acc,Prim2("+",Access acc, e))

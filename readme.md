@@ -949,56 +949,50 @@
          运行结果:![image-20210627165054615](.\img\35.png)
 
      - 编译器支持以下的运算：
-         
-     - 原MICROC 自带
-         
-           加减乘除和取余数等基本操作，与或非的运算
-         
+       
+       - 原MICROC 自带
+       
+         加减乘除和取余数等基本操作，与或非的运算
+       
          - 自增自减
-         
-           编译器通过 ++ 和 -- 符号实现自增自减，
-         
+       
+           编译器通过 ++ 和 -- 符号实现自增自减，自增自减识别++i和i++的区别，++i参与运算时，优先自增，之后参与运算；i++参与运算时，先参与运算，在运算结束后在自增，自减同理，
+       
            ```c
-             Void main(Int n) {
-                Int i;
-                i=0;
-                do {
-                    
-                    print("%d",i);
-                    i++;
-                }  
-                while(i<n);
-                i=0;
-                do {
-                   
-                    print("%d",i);
-                    ++i;
-                }  
-                while(i<n);
-                i=20;
-                do {
-                   
-                   print("%d",i);
-                   i--;
-                } 
-                while(i>n); 
-                i=20;
-                do {
-                   
-                   print("%d",i);
-                   --i;
-                }  
-                while(i>n);
-             }
+           Void main(Int n) {
+              Int i;
+              i=0;
+              do {
+                  print("%d",i++);
+           
+              }  
+              while(i<n);
+              i=0;
+              do {
+           
+                  print("%d",++i);
+              }  
+              while(i<n);
+              i=20;
+              do {
+                 print("%d",i--);
+              } 
+              while(i>n); 
+              i=20;
+              do {
+                 print("%d",--i);
+              }  
+              while(i>n);
+           }
            ```
-         
+       
            运行结果：(有点长，截不全)
-           ![image-20210627165622410](.\img\36.png)
-         
+           ![image-20210627230246957](.\img\48.png)
+       
          - 三目运算
-         
+       
            解释器通过a？b：c的实现了三目运算，判定a表达式的值来决定执行b或者c
-         
+       
            ```c
            Void main(Int n) {
                 Int i;
@@ -1006,15 +1000,15 @@
                 print("%d",i);
            }
            ```
-         
+       
            运行结果：
-         
+       
            ![image-20210627165732870](.\img\37.png)
-         
+       
          - +=等语法糖
-         
+       
            编译器支持使用+=、-=、*=、/=和%=等语法糖的写法
-         
+       
            ```c
            Void main(Int n) {
                  Int a;
@@ -1035,175 +1029,174 @@
                	print("%d",a);
              }
            ```
-         
+       
            运行结果：(有点长，截不全)
              ![image-20210627165821524](.\img\38.png)
-         
-
+       
      - 解释器支持以下语句:
-
+     
        - 原MICORC自带
-
+     
          if语句、while语句、基本的print语句
-
-       - 格式化print语句
-
-         编译器支持使用一下格式化通配符输出各种类型的数据（%d：int，%c：char，%s：string，%f：float)，编译器执行时严格按照要求，如果输出的参数和通配符不匹配，则报错
-
-         ```c
+     
+  - 格式化print语句
+     
+    编译器支持使用一下格式化通配符输出各种类型的数据（%d：int，%c：char，%s：string，%f：float)，编译器执行时严格按照要求，如果输出的参数和通配符不匹配，则报错
+     
+    ```c
           Void main(Int n) {
-                      Int a =1;
+                 Int a =1;
                       Char b ='c';
-                      Float f = 12.2;
+                 Float f = 12.2;
                       Bool bool = false;
-                      print("%d",a);
+                 print("%d",a);
                       print("%d",bool);
                       print("%c",b);
                       print("%f",f);
                       print("%f",a);
            }
          ```
-
+     
          运行结果:![image-20210627170311704](.\img\39.png)
-
+     
        - dowhile语句
-
+     
          编译器支持类似c语言的dowhile语句:
-
-         ```c
+     
+    ```c
          Void main(Int n) {
-                   Int i;
+              Int i;
                    i=0;
-                   do {
+              do {
                         print("%d",i);
-                        n=n-1;
+                   n=n-1;
                    }  
                    while(i<n);
           }
          ```
-
+     
          运行结果:![image-20210627170419930](.\img\40.png)
-
+     
        - dountil语句
-
+     
          编译器支持dountil语句，执行一个函数直到满足某个条件
-
-         ```c
+     
+    ```c
          Void main(Int n) {
-            Int i;
+       Int i;
             i=0;
-            do{
+       do{
                  print("%d",i);
-                 i = i+1;
+            i = i+1;
             }  
          until(i>n);
          }
          ```
-
+     
          运行结果:![image-20210627170501797](.\img\41.png)
-
+     
        - for语句
          编译器支持类型c语言的for循环语句
-
+     
          ```c
-         Void main(Int n) {
+    Void main(Int n) {
               Int i;
-           i=0;
+      i=0;
               for( i = 0 ; i < n;  i = i + 1){
                i=i+1;
-                  print("%d",i);
+             print("%d",i);
            }
              print("%d",i);
          }
          ```
-
+     
           运行结果:![image-20210627170538009](.\img\42.png)
-
+     
        - forin语句
-
+     
          编译器支持forin的语法，类似如下的定义方式，for  i  in  (a,b) ,如果a与b为int类型，则i将在依次赋值为a-b之间的数据，之后执行循环体：
-
-         ```c
+     
+    ```c
          Void main(Int n) {
-             Int i;
+        Int i;
           	for i in (3,7)
-             {
+        {
                  print("%d",i);
-             }
+        }
          }
          ```
-
+     
          运行结果:![image-20210627170701116](.\img\43.png)
-
+     
        - switch-case-default
          实现了类似于c语言的switch语句，当一个case语句匹配完成时，继续执行后续的语句，default关键字可以匹配全部的条件
-
+     
          ```c
-          Void main(Int n) {
+     Void main(Int n) {
              switch( n ){
-                    case 1 :  print("%d",n);
+               case 1 :  print("%d",n);
                     case 2 :  print("%d",n+1);
                     default : print("%d",2);
-                }
+           }
              print("%d",n);
           }
          ```
-
+     
          运行结果:   ![image-20210627170913004](.\img\44.png)
-
+     
        - 模式匹配
          本来想实现一个类似fsharp的模式匹配的，但是能力有限，仿照switchcase的模式实现了一个简单的matchPattern，只能精准匹配表达式的数值，不过match表达式满足匹配的内容后就不会继续执行后续的语句，直接结束循环:
-
+     
          ```c
-         Void main(Int n) {
+    Void main(Int n) {
              match n with
-             | 2 -> print("%d",n);
+        | 2 -> print("%d",n);
              | 3 -> print("%d",n+1);
              | _ -> print("%d",2);
-         }
+    }
          ```
-
+     
           运行结果:![image-20210627171047415](.\img\45.png)
-
+     
        - break语句
-
+     
          解释器实现了break语句，如果循环体中出现了break语句，则结束循环：
-
-         ```c
+     
+    ```c
          Void main(Int n) {
-             Int i;
+        Int i;
              i=0;
-             for( i = 0 ; i < n;  i = i + 1){
+        for( i = 0 ; i < n;  i = i + 1){
                  i=i+1;
-                 print("%d",i);
+            print("%d",i);
                  break;
              }
             print("%d",i);
          }
          ```
-
+     
          运行结果：  ![image-20210627171524041](.\img\46.png)
-
+     
        - continue语句
-
+     
          编译器实现了continue的逻辑，当循环体遇到continue逻辑时，跳过后续的语句，直接执行下次循环
-
-         ```c
+     
+    ```c
          Void main(Int n) {
-             Int i;
+        Int i;
              i=0; 
-             for( i = 0 ; i < n;  i = i + 1){
+        for( i = 0 ; i < n;  i = i + 1){
                  i=i+1;
-                 continue;
+            continue;
                  print("%d",i);
              }
             print("%d",i);
          }
          ```
-
+     
          运行结果：
          ![image-20210627204333139](.\img\47.png)
-
+     
      
 
 

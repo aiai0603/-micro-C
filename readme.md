@@ -772,30 +772,22 @@
          运行结果:![image-20210627114617517](.\img\25.png)
 
    - 编译器中，在MICORC的源代码的基础上进行改进，受限于指令集和运行栈只能存储int类型，只能将一些可以和int进行转换的参数进行相关的处理，因而，最后没能实现string类型的实现，尝试了将解释器中的大部分功能移植到了编译器中，部分功能可能适配不太完善，其中部分参考了Cuby的代码，为了将转化的结果进行验证，我们使用了Cuby的Java虚拟机，后来为了拓展新的功能，我们修改完善了虚拟机，现在可以更好得支持bool和float对象：
-
-
      - 编译器支持以下类型：
-    
        - 整数类型（原 MICROC 已经实现的内容）
-    
          修改为通过Int关键字定义，使用createI函数可以根据2-16进制，使用字符串创建一个int类型的数值：
-    
          ```c
         Void main(Int n) {
              Int a;
-        	a = createI("F122",16);
-             print("%d",a);
-             Int b;
-             b = createI("1010",2);
-             print("%d",b);
-         }
+             a = createI("F122",16);
+          	print("%d",a);
+          	Int b;
+          	b = createI("1010",2);
+          	print("%d",b);
+          }
          ```
-         
          运行结果:
-      ![image-20210627160717916](.\img\27.png)
-         
+        ![image-20210627160717916](.\img\27.png)
        - 指针（原 MICROC 已经实现的内容）
-    
        - 浮点数类型
        通过Float关键字定义，系统将正则表达式可以匹配为   `   ['0'-'9']+'.'['0'-'9']+ ` 的内容匹配为float数据类型,float类型之间可以进行基础的加减乘除操作等,为了实现float的输出，我们在机器指令集中添加了输出float的PRINTF指令，并在Java虚拟机中添加了相应的代码，现在编译器可以更好的支持float的定义与输出了
        
@@ -809,27 +801,23 @@
          }
          ```
           运行结果：
-       
          ![image-20210627161319355](.\img\28.png)
-       
        - bool类型
          通过Bool关键字定义，只支持定义为false和true，bool类型的数据可以自动转型为int类型输出（0和1）
-       
          ```c
           Void main(Int n) {
                 Bool b = true;
               	print("%d",b);
              }
          ```
-       
-         运行结果:
-    
+       运行结果:
+
          ![image-20210627161426798](.\img\29.png)
-    
+
        - 字符类型
-    
+       
          通过Char关键字定义，新的编译中通过将单引号中的指定字符识别为char进行存储，们在机器指令集中添加了输出char的PRINTC指令，并在Java虚拟机中添加了相应的代码，现在编译器可以更好的支持char的定义与输出了
-    
+       
          ```c
        Void main(Int n) {
              Char a;
@@ -837,11 +825,11 @@
              print("%c",a);
           }
          ```
-       
+
          运行结果：
-       
+         
          ![image-20210627161632750](.\img\30.png)
-       
+
        - 数组类型
        
          优化现有的数组的定义，支持多种类型的数组
@@ -854,7 +842,7 @@
              a[3] = 2;
            Int bb;
              bb=1;
-       
+         
              print("%d",a);
              return 0;
          
@@ -862,15 +850,15 @@
          
          ```
          运行结果：
-       
+         
          ![image-20210627162339194](.\img\31.png)
-       
+
        - 结构体
        
          实现了结构体数据类型，在main函数之前进行定义，之后再主函数中可以定义指定数据结构的实体类型，并操作其中的元素
        
          ```c
-       struct student{
+         struct student{
              int number;
            int number2;
              char name[5];
@@ -884,40 +872,39 @@
              hello.name[0] = 'a';
            print hello.number;
              print hello.name[4];
-       }
+         }
          ```
-       运行结果：
-         
-       ![image-20210627163251408](.\img\32.png)
-       
+         运行结果：
+     ![image-20210627163251408](.\img\32.png)
+
      - 编译器数据类型支持以下的规则
-    
+
        - 自动转型（弱类型）、类型检查
-    
+
          在不同类型的数据进行运算时，遵循以下的转换规则，如果不能转换，会进行报错，每个表达式和函数等都有自己的运行需求参数，然后经过自动转型之后，还是不能满足需求，则会报错。
-    
+
          int -> bool、float
          char -> int
-         float -> int
-         bool-> int
-    
+          float -> int
+          bool-> int
+
          ```c
          Void main() {
-         
-             print("%f",12.12+false);
-             print("%f",12.25+1);
-             print("%d",'a'+1);
-         }
-         
+           
+               print("%f",12.12+false);
+               print("%f",12.25+1);
+               print("%d",'a'+1);
+           }
          ```
-          运行结果：
-    
+
+         运行结果：
+
          ![image-20210627164655311](.\img\33.png)
-         
+
        - 强制转型
-    
+
          编译器除了在运算时，使用上述规则进行转换以外，还支持强制的类型转换，其中，int 0-9可以强制转换为char的‘0’-‘9’，反向转换同理；float类型在转换int时，将直接截断小数部分，目前只支持使用（int）、（char）、（float）三种强制转换符号
-    
+
          ```c
          Void main() {
              print("%d",(int)12.5);
@@ -925,28 +912,27 @@
              print("%c",(char)2);
          }
          ```
-         
+
          运行结果：
-         
+
          ![image-20210627164814080](.\img\34.png)
-    
+
      - 变量
-    
+
        - 变量的定义
-    
-           编译器和解释器在获取变量定义时，将对变量的名称进行检查，变量名一定要为小写字母开头，否则将会报错
-    
-           ```c
-           Void main(Int n) {
-               Char Aa;
-               Int Asa[10];
-            }
-           ```
-           运行结果: ![image-20210627095747974](.\img\13.png)
-    
+         编译器和解释器在获取变量定义时，将对变量的名称进行检查，变量名一定要为小写字母开头，否则将会报错： 
+
+         ```c
+         Void main(Int n) {
+             Char Aa;
+             Int Asa[10];
+         ```
+
+         运行结果: ![image-20210627095747974](.\img\13.png)
+
        - 定义时赋值
-           编译器支持在变量定义时赋初值(包括全局和内部都可以)
-    
+         编译器支持在变量定义时赋初值(包括全局和内部都可以)
+
          ```c
          Int  i =1;
          Void main(Int n) {
@@ -958,136 +944,134 @@
              print("%c",b);
            print("%f",f);
            }
+         ```
+
+         运行结果:![image-20210627165054615](.\img\35.png)
+
+     - 编译器支持以下的运算：
+         
+     - 原MICROC 自带
+         
+           加减乘除和取余数等基本操作，与或非的运算
+         
+         - 自增自减
+         
+           编译器通过 ++ 和 -- 符号实现自增自减，
+         
+           ```c
+             Void main(Int n) {
+                Int i;
+                i=0;
+                do {
+                    
+                    print("%d",i);
+                    i++;
+                }  
+                while(i<n);
+                i=0;
+                do {
+                   
+                    print("%d",i);
+                    ++i;
+                }  
+                while(i<n);
+                i=20;
+                do {
+                   
+                   print("%d",i);
+                   i--;
+                } 
+                while(i>n); 
+                i=20;
+                do {
+                   
+                   print("%d",i);
+                   --i;
+                }  
+                while(i>n);
+             }
            ```
-           运行结果:
-           
-           ![image-20210627165054615](.\img\35.png)
-
-
-     - 解释器支持以下的运算：
-    
-       - 原MICROC 自带
-    
-         加减乘除和取余数等基本操作，与或非的运算
-    
-       - 自增自减
-    
-         解释器通过 ++ 和 -- 符号实现自增自减，
-    
-         ```c
-         Void main(Int n) {
-            Int i;
-            i=0;
-            do {
-                
+         
+           运行结果：(有点长，截不全)
+           ![image-20210627165622410](.\img\36.png)
+         
+         - 三目运算
+         
+           解释器通过a？b：c的实现了三目运算，判定a表达式的值来决定执行b或者c
+         
+           ```c
+           Void main(Int n) {
+                Int i;
+           	i =  n>2?12:21;
                 print("%d",i);
-                i++;
-            }  
-            while(i<n);
-            i=0;
-            do {
-               
-                print("%d",i);
-                ++i;
-            }  
-            while(i<n);
-            i=20;
-            do {
-               
-               print("%d",i);
-               i--;
-            } 
-            while(i>n); 
-            i=20;
-            do {
-               
-               print("%d",i);
-               --i;
-            }  
-            while(i>n);
-         }
-         ```
-          运行结果：(有点长，截不全)
-         ![image-20210627165622410](.\img\36.png)
-    
-       - 三目运算
-    
-         解释器通过a？b：c的实现了三目运算，判定a表达式的值来决定执行b或者c
+           }
+           ```
          
-         ```c
-          Void main(Int n) {
-              Int i;
-         	i =  n>2?12:21;
-              print("%d",i);
-         }
-         ```
-         运行结果：
+           运行结果：
          
-         ![image-20210627165732870](.\img\37.png)
-    
-       - +=等语法糖
-    
-         编译器支持使用+=、-=、*=、/=和%=等语法糖的写法
-    
-         ```c
-         Void main(Int n) {
-             Int a;
-             a=10;
-           	a+=n;
-         	print("%d",a);
-           	a=10;
-         	a-=n;
-           	print("%d",a);
-         	a=10;
-           	a*=n;
-         	print("%d",a);
-           	a=10;
-           	a/=n;
-           	print("%d",a);
-           	a=10;
-         	a%=n;
-           	print("%d",a);
-         }
-         ```
+           ![image-20210627165732870](.\img\37.png)
          
-          运行结果：(有点长，截不全)
-         ![image-20210627165821524](.\img\38.png)
-
+         - +=等语法糖
+         
+           编译器支持使用+=、-=、*=、/=和%=等语法糖的写法
+         
+           ```c
+           Void main(Int n) {
+                 Int a;
+                 a=10;
+               	a+=n;
+             	print("%d",a);
+               	a=10;
+             	a-=n;
+               	print("%d",a);
+             	a=10;
+               	a*=n;
+             	print("%d",a);
+               	a=10;
+               	a/=n;
+               	print("%d",a);
+               	a=10;
+             	a%=n;
+               	print("%d",a);
+             }
+           ```
+         
+           运行结果：(有点长，截不全)
+             ![image-20210627165821524](.\img\38.png)
+         
 
      - 解释器支持以下语句:
-    
+
        - 原MICORC自带
-    
+
          if语句、while语句、基本的print语句
-    
+
        - 格式化print语句
-    
+
          编译器支持使用一下格式化通配符输出各种类型的数据（%d：int，%c：char，%s：string，%f：float)，编译器执行时严格按照要求，如果输出的参数和通配符不匹配，则报错
-    
-         ```c
-         Void main(Int n) {
-                    Int a =1;
-                    Char b ='c';
-                    Float f = 12.2;
-                    Bool bool = false;
-                    print("%d",a);
-                    print("%d",bool);
-                    print("%c",b);
-                    print("%f",f);
-                    print("%f",a);
-         }
-         ```
-         
-       运行结果:
-         
-       ![image-20210627170311704](.\img\39.png)
-         
-       - dowhile语句
-    
-         编译器支持类似c语言的dowhile语句:
-    
+
          ```c
           Void main(Int n) {
+                      Int a =1;
+                      Char b ='c';
+                      Float f = 12.2;
+                      Bool bool = false;
+                      print("%d",a);
+                      print("%d",bool);
+                      print("%c",b);
+                      print("%f",f);
+                      print("%f",a);
+           }
+         ```
+
+         运行结果:![image-20210627170311704](.\img\39.png)
+
+       - dowhile语句
+
+         编译器支持类似c语言的dowhile语句:
+
+         ```c
+         Void main(Int n) {
                    Int i;
                    i=0;
                    do {
@@ -1097,15 +1081,13 @@
                    while(i<n);
           }
          ```
-    
-         运行结果:
-    
-         ![image-20210627170419930](.\img\40.png)
-    
-         dountil语句
-    
+
+         运行结果:![image-20210627170419930](.\img\40.png)
+
+       - dountil语句
+
          编译器支持dountil语句，执行一个函数直到满足某个条件
-    
+
          ```c
          Void main(Int n) {
             Int i;
@@ -1117,14 +1099,12 @@
          until(i>n);
          }
          ```
-    
-         运行结果:
-    
-         ![image-20210627170501797](.\img\41.png)
-    
+
+         运行结果:![image-20210627170501797](.\img\41.png)
+
        - for语句
          编译器支持类型c语言的for循环语句
-    
+
          ```c
          Void main(Int n) {
               Int i;
@@ -1136,13 +1116,13 @@
              print("%d",i);
          }
          ```
-    
+
           运行结果:![image-20210627170538009](.\img\42.png)
-    
+
        - forin语句
-    
+
          编译器支持forin的语法，类似如下的定义方式，for  i  in  (a,b) ,如果a与b为int类型，则i将在依次赋值为a-b之间的数据，之后执行循环体：
-    
+
          ```c
          Void main(Int n) {
              Int i;
@@ -1152,30 +1132,28 @@
              }
          }
          ```
-    
-         运行结果:
-    
-         ![image-20210627170701116](.\img\43.png)
-    
+
+         运行结果:![image-20210627170701116](.\img\43.png)
+
        - switch-case-default
          实现了类似于c语言的switch语句，当一个case语句匹配完成时，继续执行后续的语句，default关键字可以匹配全部的条件
-    
+
          ```c
-           Void main(Int n) {
+          Void main(Int n) {
              switch( n ){
                     case 1 :  print("%d",n);
                     case 2 :  print("%d",n+1);
                     default : print("%d",2);
                 }
              print("%d",n);
-            }
+          }
          ```
-    
+
          运行结果:   ![image-20210627170913004](.\img\44.png)
-    
+
        - 模式匹配
-         本来想实现一个类似fsharp的模式匹配的，但是能力有限，仿照switchcase的模式实现了一个简单的matchPattern，只能精准匹配表达式的数值:
-    
+         本来想实现一个类似fsharp的模式匹配的，但是能力有限，仿照switchcase的模式实现了一个简单的matchPattern，只能精准匹配表达式的数值，不过match表达式满足匹配的内容后就不会继续执行后续的语句，直接结束循环:
+
          ```c
          Void main(Int n) {
              match n with
@@ -1184,15 +1162,13 @@
              | _ -> print("%d",2);
          }
          ```
-    
-         运行结果:
-         
-         ![image-20210627171047415](.\img\45.png)
-         
+
+          运行结果:![image-20210627171047415](.\img\45.png)
+
        - break语句
-    
+
          解释器实现了break语句，如果循环体中出现了break语句，则结束循环：
-    
+
          ```c
          Void main(Int n) {
              Int i;
@@ -1205,11 +1181,31 @@
             print("%d",i);
          }
          ```
-    
+
+         运行结果：  ![image-20210627171524041](.\img\46.png)
+
+       - continue语句
+
+         编译器实现了continue的逻辑，当循环体遇到continue逻辑时，跳过后续的语句，直接执行下次循环
+
+         ```c
+         Void main(Int n) {
+             Int i;
+             i=0; 
+             for( i = 0 ; i < n;  i = i + 1){
+                 i=i+1;
+                 continue;
+                 print("%d",i);
+             }
+            print("%d",i);
+         }
+         ```
+
          运行结果：
-         ![image-20210627171524041](.\img\46.png)
-    
-     - 函数
+         ![image-20210627204333139](.\img\47.png)
+
+     
+
 
 
 ​     

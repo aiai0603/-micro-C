@@ -4,20 +4,20 @@ Void main(Int n) {
 
     a="test1";
   
-    println(a);
+    print("%s",a);
    
     String b;
 
     b="mytest2";
-    println(a);
-    println(b);
+    print("%s",a);
+    print("%s",b);
     
 
     Int c;
     c=12;
     b="mytest2";
-    println(a);
-    println(b);
+    print("%s",a);
+    print("%s",b);
     print("%d",c);
  
 

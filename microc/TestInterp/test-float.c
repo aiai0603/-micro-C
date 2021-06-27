@@ -6,4 +6,3 @@ Void main(Int n) {
    print("%f",(a+b));
 
 }
-

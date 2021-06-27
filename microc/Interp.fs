@@ -38,11 +38,65 @@ open Debug
 // 值 data可以是任意类型
 
 type mem =
-  | Int of Int
-  | String of string
-  | Float of float
-  | Char of char
-  | Boolean of bool
+  | INT of int
+  | STRING of string
+  | POINTER of int
+  | FLOAT of float
+  | CHAR of char
+  | BOOLEAN of bool
+  | STRUCT of string*int*int
+  | ARRAY of typ*int*int
+
+  member this.int = 
+    match this with 
+    | INT i -> i
+    | POINTER i -> i
+    | FLOAT f -> int f
+    | CHAR c -> int c
+    | BOOLEAN b -> if b then 1 else 0
+    | STRUCT (s,i,size) -> i
+    | ARRAY (typ , i,size) -> i
+    | _ -> failwith("not int")
+  
+  member this.string = 
+    match this with 
+    | STRING s -> s
+    | _ -> failwith("not string")
+  
+  member this.char = 
+    match this with 
+    | CHAR c -> c
+    | INT i -> char i
+    | _ -> failwith("not char")
+
+  member this.float = 
+    match this with 
+    | FLOAT f -> f
+    | INT i -> float i
+    | _ -> failwith("not float")
+
+  member this.boolean = 
+    match this with 
+    | BOOLEAN b -> b
+    | _ -> failwith("not boolean")
+
+  member this.pointer = 
+    match this with 
+    | POINTER i -> i
+    | INT i -> i
+    | _ -> failwith("not pointer")
+  
+  member this.checktype =
+    match this with 
+    | INT i -> TypI
+    | FLOAT f -> TypF
+    | CHAR c -> TypC
+    | BOOLEAN b -> TypB
+    | STRING s -> TypS
+    | ARRAY(typ,i,size) ->  TypA(typ,Some size)
+    | STRUCT (s,i,size) -> TypeStruct s
+    | _ -> failwith("error")
+
 
 type 'data env = (string * 'data) list
 
@@ -113,10 +167,10 @@ type address = int
 // 位置0 保存了值 3
 // 位置1 保存了值 8
 
-type store = Map<address,int>
+type store = Map<address,mem>
 
 //空存储
-let emptyStore = Map.empty<address,int>
+let emptyStore = Map.empty<address,mem>
 
 //保存value到存储store
 let setSto (store : store) addr value = store.Add(addr, value)
@@ -126,7 +180,7 @@ let getSto (store : store) addr = store.Item addr
 
 // store上从loc开始分配n个值的空间
 let rec initSto loc n store = 
-    if n=0 then store else initSto (loc+1) (n-1) (setSto store loc -999)
+    if n=0 then store else initSto (loc+1) (n-1) (setSto store loc (INT -999))
 
 (* Combined environment and store operations *)
 
@@ -154,7 +208,7 @@ let rec bindVars xs vs locEnv store : locEnv * store =
     match (xs, vs) with 
     | ([], [])         -> (locEnv, store)
     | (x1::xr, v1::vr) -> 
-      let (locEnv1, sto1) = bindVar x1 v1 locEnv store
+      let (locEnv1, sto1) = bindVar x1  v1 locEnv store
       bindVars xr vr locEnv1 sto1
     | _ -> failwith "parameter/argument mismatch"    
 
@@ -167,13 +221,18 @@ let rec allocate (typ, x) (env0, nextloc) structEnv sto0 : locEnv * store =
     let (nextloc1, v, sto1) =
         match typ with
         //数组 调用initSto 分配 i 个空间
-        | TypA (t, Some i) -> (nextloc+i, nextloc, initSto nextloc i sto0)
+        | TypA (t, Some i) -> (nextloc+i, (ARRAY(t,nextloc,i)), initSto nextloc i sto0)
+        | TypA (t, None) -> (nextloc, (ARRAY(typ,nextloc,0)), sto0)
         // 默认值是 -1
-        | TypS  -> (nextloc+128, nextloc, initSto nextloc 128 sto0)
         | TypeStruct s -> let (index,arg,size) = structLookup structEnv s 0
-                          (nextloc+size, index, initSto nextloc size sto0)
-        | _ -> (nextloc, -1, sto0)
-       
+                          (nextloc+size, (STRUCT (s,index,size)), initSto nextloc size sto0)
+        | TypB   -> (nextloc,  (BOOLEAN false), sto0)
+        | TypI   -> (nextloc,  (INT 0),sto0)
+        | TypP i -> (nextloc,  (POINTER 0),sto0)
+        | TypC   -> (nextloc,  (CHAR (char 0)),sto0)
+        | TypS   -> (nextloc, (STRING ""),sto0)
+        | TypF   -> (nextloc, (FLOAT 0.0),sto0)
+        | _ -> (nextloc,  (INT -1), sto0)      
     bindVar x v (env0, nextloc1) sto1
 
 (* Build global environment of variables and functions.  For global
@@ -183,71 +242,12 @@ let rec allocate (typ, x) (env0, nextloc) structEnv sto0 : locEnv * store =
 let allsize typ = 
     match typ with
     |  TypA (t, Some i) -> i
-    |  TypS ->  128
     |  _ -> 1
 
 
 
 (* ------------------------------------------------------------------- *)
-let float2BitInt  (a:float32) :int= 
-   let mutable sflag = "0"
-   if a > (float32 0) then sflag = "0"
-                      else sflag = "1"
-   let mutable temp = int a
-   let mutable tail = a-float32 (int a)
-   let mutable re = ""
 
-   let mutable count = 0;
-   while temp<>0 && count<8 do
-      re <-  (string (temp % 2)) + re
-      count <- count+1
-      temp <- temp / 2
-   while count <8 do
-      re<- "0"+re
-      count <- count+1
-   let mutable count2 = 0;
-   while  tail<> float32 0  && count2<23 do
-      tail <- tail+ tail
-      re <- re + string( (  int tail  )%2 )
-      count2 <- count2+1
-      tail <- tail - (float32 (int tail))
-   while count2 <23 do
-      re<- re+"0"
-      count2 <- count2+1
-   re <- sflag + re;
-
-   let mutable fin = 0;
-   for i=0 to 31 do
-        fin <- ( fin * 2 +  ( int (string (re.Chars(i))) )  );
-   fin
-
-let Int2float  (a:int) :float32= 
-  
-    let mutable s = "";
-    let mutable temp = a;
-    while temp<>0 do
-      s <- (string (temp%2))  + s;
-      temp <- temp/2;
-    while s.Length<32 do 
-      s <- "0" + s
-    
-    let mutable a = 1;
-    let mutable main = 0;
-    
-    if s.Chars(0).Equals('1') then
-      a <- -1;
-    for i=0 to 7 do
-        main <- main*2 + (int (string (s.Chars(i+1))))
-    
-    let mutable fina = float32 main
-    let mutable pow = 0.5F
-
-    for i=0 to 22 do
-        fina <- fina+ (float32 (string (s.Chars(i+9))))*pow
-        pow <- pow * 0.5F
-    
-    fina*(float32 a)
-    
 
 (* Interpreting micro-C statements *)
 
@@ -255,7 +255,7 @@ let rec exec stmt (locEnv : locEnv) (gloEnv : gloEnv)(structEnv: structEnv) (sto
     match stmt with
     | If(e, stmt1, stmt2) -> 
       let (v, store1) = eval e locEnv gloEnv structEnv store
-      if v<>0 then exec stmt1 locEnv gloEnv structEnv store1 //True分支
+      if v.int<>0 then exec stmt1 locEnv gloEnv structEnv store1 //True分支
               else exec stmt2 locEnv gloEnv structEnv store1 //False分支
     | While(e, body) -> 
       //定义 While循环辅助函数 loop
@@ -263,7 +263,7 @@ let rec exec stmt (locEnv : locEnv) (gloEnv : gloEnv)(structEnv: structEnv) (sto
                 //求值 循环条件,注意变更环境 store
               let (v, store2) = eval e locEnv gloEnv structEnv store1
                 // 继续循环
-              if v<>0 then loop (exec body locEnv gloEnv structEnv store2)
+              if v.int<>0 then loop (exec body locEnv gloEnv structEnv store2)
                       else store2  //退出循环返回 环境store2
       loop store
     | Expr e ->
@@ -290,9 +290,10 @@ let rec exec stmt (locEnv : locEnv) (gloEnv : gloEnv)(structEnv: structEnv) (sto
                 //求值 循环条件,注意变更环境 store
               let (v, store2) = eval e2 locEnv gloEnv structEnv store1
                 // 继续循环
-              if v<>0 then  let (reend ,store3) = eval e3 locEnv gloEnv structEnv (exec body locEnv gloEnv structEnv store2)
+              if v.int<>0 then  
+                            let (reend ,store3) = eval e3 locEnv gloEnv structEnv (exec body locEnv gloEnv structEnv store2)
                             loop store3
-                      else store2  
+                          else store2  
           loop store0
     | Forin(acc,e1,e2,body) -> 
           let (loc, store1) = access acc locEnv gloEnv structEnv store
@@ -300,9 +301,9 @@ let rec exec stmt (locEnv : locEnv) (gloEnv : gloEnv)(structEnv: structEnv) (sto
           let (re2,store3) = eval e2 locEnv gloEnv  structEnv store2
           match e1 with
           | CstI i -> let rec loop i stores =
-                          if i<>(re2+1) then loop (i+1) (exec body locEnv gloEnv structEnv (setSto stores loc i) )
+                          if i<>(re2.int+1) then loop (i+1) (exec body locEnv gloEnv structEnv (setSto stores loc (INT i)) )
                                     else (stores)
-                      loop re store3 
+                      loop re.int store3 
           | Access acc -> match acc with
                           | AccIndex(ac, idx) ->
                             let rec loop i stores =
@@ -311,7 +312,7 @@ let rec exec stmt (locEnv : locEnv) (gloEnv : gloEnv)(structEnv: structEnv) (sto
                                               | AccIndex(ac2, idx2) ->
                                                 let ( index,stores2) = eval idx2 locEnv gloEnv structEnv stores ;
                                                 if i<>e2 then let (result,s) = eval i locEnv gloEnv structEnv stores2
-                                                              loop (Access (AccIndex (ac,CstI (index+1)) ) ) (exec body locEnv gloEnv structEnv (setSto s loc result) )
+                                                              loop (Access (AccIndex (ac,CstI (index.int+1)) ) ) (exec body locEnv gloEnv structEnv (setSto s loc result) )
                                                          else let (result,s) = eval i locEnv gloEnv structEnv stores2
                                                               exec body locEnv gloEnv structEnv (setSto s loc result) 
                             loop e1 store3 
@@ -320,7 +321,7 @@ let rec exec stmt (locEnv : locEnv) (gloEnv : gloEnv)(structEnv: structEnv) (sto
                 //求值 循环条件,注意变更环境 store
               let (v, store2) = eval e locEnv gloEnv structEnv store1
                 // 继续循环
-              if v<>0 then loop (exec body locEnv gloEnv structEnv store2)
+              if v.int<>0 then loop (exec body locEnv gloEnv structEnv store2)
                       else store2  //退出循环返回 环境store2
       loop (exec body locEnv gloEnv structEnv store)
     | Switch(e,body) ->  
@@ -355,11 +356,11 @@ let rec exec stmt (locEnv : locEnv) (gloEnv : gloEnv)(structEnv: structEnv) (sto
     | DoUntil(body,e) -> 
       let rec loop store1 =
               let (v, store2) = eval e locEnv gloEnv structEnv  store1
-              if v=0 then loop (exec body locEnv gloEnv structEnv  store2)
+              if v.int=0 then loop (exec body locEnv gloEnv structEnv  store2)
                      else store2    
       loop (exec body locEnv gloEnv structEnv store)
-    | Break -> failwith("break")
-    | Continue -> failwith("continue")
+    | Break -> failwith("break not done")
+    | Continue -> failwith("continue not done")
 
 and stmtordec stmtordec locEnv gloEnv structEnv store = 
     match stmtordec with 
@@ -367,180 +368,45 @@ and stmtordec stmtordec locEnv gloEnv structEnv store =
     | Dec(typ, x) -> allocate (typ, x)  locEnv structEnv store
     | DeclareAndAssign(typ, x,e) -> let (loc,store1) = allocate (typ, x)  locEnv structEnv store
                                     let (loc2, store2) = access (AccVar x) loc gloEnv structEnv store1
-                                    let (res, store3) = 
-                                      match e with
-                                      | ConstString s ->  let rec sign index stores=
-                                                           if index<s.Length then
-                                                              sign (index+1) ( setSto stores (loc2-index-1) (int (s.Chars(index) ) ) )
-                                                            else stores  
-                                                          ( s.Length   ,sign 0 store2)
-                                      | _ ->  eval e loc gloEnv structEnv store2
-                                    (res, setSto store3 loc2 res) 
+                                    let (res, store3) =  eval e loc gloEnv structEnv store2
+                                    (loc, setSto store3 loc2 res) 
 
 (* Evaluating micro-C expressions *)
-
-
-and typeof e locEnv gloEnv structEnv store : typ =  
-    match e with  
-    | ToInt e -> TypI
-    | ToChar e -> TypC
-    | ToFloat e -> TypF
-    | CreateI(s,hex) -> TypI
-    | Access acc     -> let (loc, store1) = access acc locEnv gloEnv structEnv store
-                        (getSto store1 loc, store1) 
-    | Self(acc,opt,e)-> let typ1 =  typeof e locEnv gloEnv structEnv store
-                        match opt with
-                        | "*"  ->  let res = i1 * i2
-                                   (res, setSto store2 loc res)
-                        | "+B"  -> let res = i1 + i2
-                                   (res, setSto store2 loc res)
-                        | "-B"  -> let res = i1 - i2  
-                                   (res, setSto store2 loc res)
-                        | "+"  ->  let res = i1 + i2
-                                   (i1, setSto store2 loc res)
-                        | "-"  ->  let res = i1 - i2  
-                                   (i1, setSto store2 loc res)
-                        | "/"  ->  let res = i1 / i2  
-                                   (res, setSto store2 loc res)
-                        | "%"  ->  let res = i1 % i2  
-                                   (res, setSto store2 loc res)
-                        | _    -> failwith ("unknown primitive " + opt) 
-    | Assign(acc, e) -> typeof e locEnv gloEnv structEnv store
-    | CstI i         -> TypI
-    | ConstNull      -> TypI
-    | ConstBool b    -> TypB
-    | ConstString s  -> TypS
-    | ConstFloat f   -> TypF
-    | ConstChar c    -> TypC
-    | Addr acc       -> match acc with 
-                       | AccVar x           -> (lookup (fst locEnv) x, store)
-                       | AccDeref e         -> eval e locEnv gloEnv structEnv store
-                       | AccIndex(acc, idx) -> 
-                              let (a, store1) = access acc locEnv gloEnv structEnv store
-                              let aval = getSto store1 a
-                              let (i, store2) = eval idx locEnv gloEnv structEnv store1
-                              (aval + i, store2) 
-                       | AccStruct(acc,acc2) ->  
-                              let (a, store1) = access acc locEnv gloEnv structEnv store
-                              let aval = getSto store1 a
-                              let list = structEnv.[aval]
-                              let param =
-                                  match list with 
-                                  | (string,paramdecs,int) -> paramdecs
-                              let rec lookuptyp list index = 
-                                  match list with
-                                  | [] -> failwith("can not find ")
-                                  | (typ , name ) ::tail -> match acc2 with
-                                                            | AccVar x -> if x = name then typ
-                                                                                      else lookuptyp tail ( index + ( allsize typ) )
-                                                            | AccIndex( acc3, idx ) ->  match acc3 with
-                                                                                        | AccVar y ->  if name = y then 
-                                                                                                       match typ with 
-                                                                                                       | TypA (arrtyp) -> arrtyp
-                                                                                                       else lookuptyp tail (index + (allsize typ))
-    | Println(acc)   -> let typ = typeof e1 locEnv gloEnv structEnv store 
-                        typ = TypS then TypS 
-                                   else failwith("type error")
-    | Print(op,e1)   -> let typ = typeof e1 locEnv gloEnv structEnv store 
-                        match op with
-                        | "%c"   -> if typ = TypC then TypC
-                                                  else failwith("type error")
-                        | "%d"   -> if typ = TypI then TypI
-                                                  else failwith("type error")  
-                        | "%f"   -> if typ = TypF then TypF
-                                                  else failwith("type error")                
-    | PrintHex(hex,e1)-> let typ = typeof e1 locEnv gloEnv structEnv store 
-                         if typ = TypI then TypI
-                                       else failwith("type error")
-    | Prim1(ope, e1) ->
-      let typ = typeof e1 locEnv gloEnv structEnv store
-          match (ope, typ) with
-          | ("!" ,TypI)    -> TypB
-          | ("!" ,TypB)    -> TypB
-          | _        -> failwith ("unknown primitive " + ope) 
-    | Prim2(ope, e1, e2) ->
-      let typ1 = typeof e1 locEnv gloEnv structEnv store
-      let typ2 = typeof e2 locEnv gloEnv structEnv store
-      match (ope, typ1, typ2) with  
-      | ("*",  TypI, TypI) -> TypI  
-      | ("+",  TypI, TypI) -> TypI
-      | ("+",  TypF, TypF) -> TypF  
-      | ("+",  TypI, TypC) -> TypC
-      | ("+",  TypC, TypI) -> TypC  
-      | ("-",  TypI, TypI) -> TypI
-      | ("-",  TypF, TypF) -> TypF  
-      | ("-",  TypC, TypI) -> TypC
-      | ("==", TypI, TypI) -> TypB
-      | ("==", TypB, TypB) -> TypB  
-      | ("==", TypC, TypC) -> TypB 
-      | ("==", TypF, TypF) -> TypB
-      | ("!=", TypI, TypI) -> TypB
-      | ("!=", TypB, TypB) -> TypB  
-      | ("!=", TypC, TypC) -> TypB 
-      | ("!=", TypF, TypF) -> TypB  
-      | ("<=", TypI, TypI) -> TypB
-      | ("<=", TypB, TypB) -> TypB  
-      | ("<=", TypC, TypC) -> TypB 
-      | ("<=", TypF, TypF) -> TypB 
-      | ("<", TypI, TypI) -> TypB
-      | ("<", TypB, TypB) -> TypB  
-      | ("<", TypC, TypC) -> TypB 
-      | ("<", TypF, TypF) -> TypB 
-      | (">=", TypI, TypI) -> TypB
-      | (">=", TypB, TypB) -> TypB  
-      | (">=", TypC, TypC) -> TypB 
-      | (">=", TypF, TypF) -> TypB 
-      | (">", TypI, TypI) -> TypB
-      | (">", TypB, TypB) -> TypB  
-      | (">", TypC, TypC) -> TypB 
-      | (">", TypF, TypF) -> TypB 
-      | _   -> failwith "unknown primitive, or type error"  
-    | Prim3( e1, e2 , e3) ->
-         let typ1 = typeof e1 locEnv gloEnv structEnv store
-         let typ2 = typeof e2 locEnv gloEnv structEnv store
-         let typ3 = typeof e2 locEnv gloEnv structEnv store
-         if typ1 = TypB then 
-                        let (i1, store1) = eval e1 locEnv gloEnv structEnv store
-                        if i1 <> 0 then typ3
-                                  else typ2
-                        else typ3
-         elif typ1 = TypI then 
-                        let (i1, store1) = eval e1 locEnv gloEnv structEnv store
-                        if i1 <> 0 then typ3
-                                  else typ2
-         else failwith("type error")
-    | Andalso(e1, e2) ->
-       let typ1 = typeof e1 locEnv gloEnv structEnv store
-       let typ2 = typeof e2 locEnv gloEnv structEnv store 
-       match (typ1,typ2) with
-       | (TypB,TypB) -> TypB
-       | (TypI,TypI) -> TypB
-       | (TypB,TypI) -> TypB
-       | (TypI,TypB) -> TypB
-    | Orelse(e1, e2) -> 
-        let typ1 = typeof e1 locEnv gloEnv structEnv store
-        let typ2 = typeof e2 locEnv gloEnv structEnv store 
-        match (typ1,typ2) with
-        | (TypB,TypB) -> TypB
-        | (TypI,TypI) -> TypB
-        | (TypB,TypI) -> TypB
-        | (TypI,TypB) -> TypB
-    | Call(f, es) ->  TypI
     
 
-and eval e locEnv gloEnv structEnv store : int  * store = 
+and eval e locEnv gloEnv structEnv store : mem  * store = 
 
     match e with
-    | ToInt e -> match e with
-                 | ConstChar c -> (int c - int '0',store)
-                 | ConstFloat f -> (int f,store)
-                 | _ -> eval e locEnv gloEnv structEnv store
-    | ToChar e -> match e with
-                 | CstI i -> (i + int '0',store)
-                 | _ -> eval e locEnv gloEnv structEnv store
-    | ToFloat e -> match e with
-                 | CstI i -> (float2BitInt( float32 i),store)
-                 | _ -> eval e locEnv gloEnv structEnv store
+    | Sizeof e -> let (res,s1) = eval e locEnv gloEnv structEnv store
+                  match res with
+                  | STRUCT (s,i,size) -> (INT size,s1)
+                  | ARRAY (typ , i,size) -> (INT size,s1)
+                  | STRING s -> (INT s.Length,s1)
+                  | _ -> (INT 1,s1)
+
+
+    | Typeof e -> let (res,s) = eval e locEnv gloEnv structEnv store
+                  match res.checktype with
+                  | TypB   -> (STRING "Bool",s)
+                  | TypI   -> (STRING "Int",s)
+                  | TypP i -> (STRING "Pointer",s)
+                  | TypC   -> (STRING "Char",s)
+                  | TypS   -> (STRING "String",s)
+                  | TypF   -> (STRING "Float",s)
+                  | TypA (typ,i) -> (STRING "Array",s)
+                  | TypeStruct str  -> (STRING ("Struct "+str),s)
+    | ToInt e ->  let (res,s) = eval e locEnv gloEnv structEnv store
+                  match res with
+                  | CHAR i when i>='0' && i<='9' -> (INT(int i - int '0'),s)
+                  | _ ->  (INT (res.int) ,s)
+    | ToChar e -> let (res,s) = eval e locEnv gloEnv structEnv store
+                  match res with
+                  | INT i when i>=0 && i<=9 -> (CHAR(char(i + int '0')),s)
+                  | _ ->  (CHAR (res.char) ,s)
+    | ToFloat e -> let (res,s) = eval e locEnv gloEnv structEnv store
+                   match res with
+                   | CHAR c -> (FLOAT (float (int c)),s)
+                   |_ -> (FLOAT (res.float) ,s)
     | CreateI(s,hex) -> let mutable res = 0;
                         for i=0 to s.Length-1 do
                            if s.Chars(i)>='0' && s.Chars(i)<='9' then
@@ -551,65 +417,66 @@ and eval e locEnv gloEnv structEnv store : int  * store =
                              res <- res*hex + ( (int (s.Chars(i)))-(int 'A')+10 )
                            else 
                              failwith("ERROR WORLD IN NUMBER")
-                        (res,store)
+                        (INT res,store)
     | Access acc     -> let (loc, store1) = access acc locEnv gloEnv structEnv store
                         (getSto store1 loc, store1) 
     | Self(acc,opt,e)-> let (loc, store1) = access acc locEnv gloEnv structEnv store
-                        let (i1) = getSto store1 loc
-                        let (i2, store2) = eval e locEnv gloEnv structEnv store
+                        let (mem1) = getSto store1 loc
+                        let (mem2, store2) = eval e locEnv gloEnv structEnv store
+                        let i1 =  mem1.float
+                        let i2 =  mem2.float
                         match opt with
-                        | "*"  ->  let res = i1 * i2
+                        | "*"  ->  let res =
+                                      if mem1.checktype = TypF && mem2.checktype = TypF then  FLOAT (float (i1 * i2))
+                                      else INT (int (i1 * i2) )
                                    (res, setSto store2 loc res)
-                        | "+B"  -> let res = i1 + i2
+                        | "+B"  -> let res =
+                                      if mem1.checktype = TypF && mem2.checktype = TypF then  FLOAT (float (i1 + i2))
+                                      else INT (int (i1 + i2) )
                                    (res, setSto store2 loc res)
-                        | "-B"  -> let res = i1 - i2  
+                        | "-B"  -> let res =
+                                      if mem1.checktype = TypF && mem2.checktype = TypF then  FLOAT (float (i1 - i2))
+                                      else INT (int (i1 - i2) )  
                                    (res, setSto store2 loc res)
-                        | "+"  ->  let res = i1 + i2
-                                   (i1, setSto store2 loc res)
-                        | "-"  ->  let res = i1 - i2  
-                                   (i1, setSto store2 loc res)
-                        | "/"  ->  let res = i1 / i2  
+                        | "+"  ->  let res =
+                                      if mem1.checktype = TypF && mem2.checktype = TypF then  FLOAT (float (i1 + i2))
+                                      else INT (int (i1 + i2) )
+                                   (mem1, setSto store2 loc res)
+                        | "-"  ->  let res =
+                                      if mem1.checktype = TypF && mem2.checktype = TypF then  FLOAT (float (i1 - i2))
+                                      else INT (int (i1 - i2) )  
+                                   (mem1, setSto store2 loc res)
+                        | "/"  ->  let res =
+                                      if mem1.checktype = TypF && mem2.checktype = TypF then  FLOAT (float (i1 / i2))
+                                      else INT (int (i1 / i2) )  
                                    (res, setSto store2 loc res)
-                        | "%"  ->  let res = i1 % i2  
+                        | "%"  ->  let res =
+                                      if mem1.checktype = TypF && mem2.checktype = TypF then  FLOAT (float (i1 % i2))
+                                      else INT (int (i1 % i2) )  
                                    (res, setSto store2 loc res)
                         | _    -> failwith ("unknown primitive " + opt)
                        
     | Assign(acc, e) -> let (loc, store1) = access acc locEnv gloEnv structEnv store
-                        let (res,store2)= 
-                          match e with
-                          | ConstString s -> let rec sign index stores=
-                                                if index<s.Length then
-                                                  sign (index+1) ( setSto stores (loc-index-1) (int (s.Chars(index) ) ) )
-                                                else stores  
-                                             ( s.Length   ,sign 0 store1)
-                          | _ ->  eval e locEnv gloEnv structEnv store1
+                        let (res,store2)=  eval e locEnv gloEnv structEnv store1
                         (res, setSto store2 loc res) 
-    | CstI i         -> (i, store)
-    | ConstNull      -> (0 ,store)
-    | ConstBool b    -> let res  = 
-                            if b = false then 0 
-                                         else 1
-                        (res,store)
-    | ConstString s  -> (s.Length,store)
-    | ConstFloat f   -> (float2BitInt f,store)
-    | ConstChar c    -> ((int c), store)
-    | Addr acc       -> access acc locEnv gloEnv structEnv store
-    | Println(acc)   -> let (loc, store1) = access acc locEnv gloEnv structEnv store
-                        let (i1) = getSto store1 loc
-                        for i= 0 to i1-1 do
-                            let i2 = getSto store1 (loc-i-1)
-                            (printf "%c" (char i2))
-                        (printf "\n" )
-                        (i1,store1)
+    | CstI i         -> (INT i, store)
+    | ConstNull      -> (INT 0 ,store)
+    | ConstBool b    -> (BOOLEAN b,store)
+    | ConstString s  -> (STRING s,store)
+    | ConstFloat f   -> (FLOAT (float f),store)
+    | ConstChar c    -> (CHAR c, store)
+    | Addr acc       -> let (acc1,s) = access acc locEnv gloEnv structEnv store
+                        (POINTER acc1, s)
     | Print(op,e1)   -> let (i1, store1) = eval e1 locEnv gloEnv structEnv store
                         let res = 
                           match op with
-                          | "%c"   -> (printf "%c " (char i1); i1)
-                          | "%d"   -> (printf "%d " i1; i1)  
-                          | "%f"   -> (printf "%f " (Int2float(i1));i1 )
+                          | "%c"   -> (printf "%c " i1.char; i1)
+                          | "%d"   -> (printf "%d " i1.int ; i1)  
+                          | "%f"   -> (printf "%f " i1.float ;i1 )
+                          | "%s"   -> (printf "%s " i1.string ;i1 )
                         (res, store1)  
     | PrintHex(hex,e1)->let (i1, store1) = eval e1 locEnv gloEnv structEnv store
-                        let mutable temp = i1
+                        let mutable temp = i1.int
                         let mutable s  = ""
                         while temp>0 do
                            if temp%hex>=0 && temp%hex<=9  then
@@ -619,76 +486,95 @@ and eval e locEnv gloEnv structEnv store : int  * store =
                               s <-  string ( char ((  temp % hex   )+55) ) + s;
                               temp <- temp/hex;
                         printf "%s " s ;
-                        (i1, store1)         
+                        (STRING s, store1)         
     | Prim1(ope, e1) ->
       let (i1, store1) = eval e1 locEnv gloEnv structEnv store
       let res =
           match ope with
-          | "!"      -> if i1=0 then 1 else 0
+          | "!"      -> if i1.int=0 then BOOLEAN true else BOOLEAN false
           | _        -> failwith ("unknown primitive " + ope)
       (res, store1) 
     | Prim2(ope, e1, e2) ->
-      let (i1, store1) = eval e1 locEnv gloEnv structEnv store
-      let (i2, store2) = eval e2 locEnv gloEnv structEnv store1
-      let res =
-          match ope with
-          | "*"  -> i1 * i2
-          | "+"  -> i1 + i2
-          | "-"  -> i1 - i2
-          | "/"  -> i1 / i2
-          | "%"  -> i1 % i2
-          | "==" -> if i1 =  i2 then 1 else 0
-          | "!=" -> if i1 <> i2 then 1 else 0
-          | "<"  -> if i1 <  i2 then 1 else 0
-          | "<=" -> if i1 <= i2 then 1 else 0
-          | ">=" -> if i1 >= i2 then 1 else 0
-          | ">"  -> if i1 >  i2 then 1 else 0
-          | _    -> failwith ("unknown primitive " + ope)
-      (res, store2) 
+          let (mem1, store1) = eval e1 locEnv gloEnv structEnv store
+          let (mem2, store2) = eval e2 locEnv gloEnv structEnv store1
+          let i1 =  mem1.float
+          let i2 =  mem2.float 
+          let res =
+            match ope with
+            | "*"  -> if mem1.checktype = TypF && mem2.checktype = TypF then  FLOAT (float (i1 + i2)) else INT (int (i1 * i2) )
+            | "+"  -> if mem1.checktype = TypF && mem2.checktype = TypF then  FLOAT (float (i1 + i2)) else INT (int (i1 + i2) )
+            | "-"  -> if mem1.checktype = TypF && mem2.checktype = TypF then  FLOAT (float (i1 - i2)) else INT (int (i1 - i2) )  
+            | "/"  -> if mem1.checktype = TypF && mem2.checktype = TypF then  FLOAT (float (i1 / i2)) else INT (int (i1 / i2) )  
+            | "%"  -> if mem1.checktype = TypF && mem2.checktype = TypF then  FLOAT (float (i1 % i2)) else INT (int (i1 % i2) )  
+            | "==" -> if i1 =  i2 then BOOLEAN true else BOOLEAN false
+            | "!=" -> if i1 <> i2 then BOOLEAN true else BOOLEAN false
+            | "<"  -> if i1 <  i2 then BOOLEAN true else BOOLEAN false
+            | "<=" -> if i1 <= i2 then BOOLEAN true else BOOLEAN false
+            | ">=" -> if i1 >= i2 then BOOLEAN true else BOOLEAN false
+            | ">"  -> if i1 >  i2 then BOOLEAN true else BOOLEAN false
+            | _    -> failwith ("unknown primitive " + ope)
+          (res, store2) 
     | Prim3( e1, e2 , e3) ->
         let (i1, store1) = eval e1 locEnv gloEnv structEnv store
         let (i2, store2) = eval e2 locEnv gloEnv structEnv store1
         let (i3, store3) = eval e3 locEnv gloEnv structEnv store2
-        if i1 = 0 then (i2,store3) 
-                  else (i3,store3)  
+        if i1.int = 0 then (i2,store3) 
+                      else (i3,store3)  
     | Andalso(e1, e2) -> 
       let (i1, store1) as res = eval e1 locEnv gloEnv structEnv store
-      if i1<>0 then eval e2 locEnv gloEnv structEnv store1 else res
+      if i1.int<>0 then eval e2 locEnv gloEnv structEnv store1 else res
     | Orelse(e1, e2) -> 
       let (i1, store1) as res = eval e1 locEnv gloEnv structEnv store
-      if i1<>0 then res else eval e2 locEnv gloEnv structEnv store1
+      if i1.int<>0 then res else eval e2 locEnv gloEnv structEnv store1
     | Call(f, es) -> callfun f es locEnv gloEnv structEnv store 
 
 
 and access acc locEnv gloEnv structEnv store : int * store = 
+ 
     match acc with 
     | AccVar x           -> (lookup (fst locEnv) x, store)
-    | AccDeref e         -> eval e locEnv gloEnv structEnv store
+    | AccDeref e         -> let (res,s) =eval e locEnv gloEnv structEnv store
+                            (res.int,s)
     | AccIndex(acc, idx) -> 
       let (a, store1) = access acc locEnv gloEnv structEnv store
       let aval = getSto store1 a
       let (i, store2) = eval idx locEnv gloEnv structEnv store1
-      (aval + i, store2) 
-    | AccStruct(acc,acc2) ->  let (a, store1) = access acc locEnv gloEnv structEnv store
-                              let aval = getSto store1 a
-                              let list = structEnv.[aval]
+      let size = 
+        match aval with
+        | ARRAY (name,i,size) -> size
+      if(i.int>=size) then  failwith( " index out of size" )
+      elif(i.int<0) then failwith( " index out of size" )
+      else (aval.int + i.int, store2) 
+    | AccStruct(acc,acc2) ->  let (b, store1) = access acc locEnv gloEnv structEnv store
+                              let aval = getSto store1 b
+                              let list = structEnv.[aval.int]
                               let param =
                                   match list with 
                                   | (string,paramdecs,int) -> paramdecs
+                              let sizestruct =
+                                  match list with 
+                                  | (string,paramdecs,i) -> i
+                              let a = b - sizestruct;
                               let rec lookupidx list index = 
                                   match list with
                                   | [] -> failwith("can not find ")
                                   | (typ , name ) ::tail -> match acc2 with
-                                                            | AccVar x -> if x = name then ( index + ( allsize typ ) )
+                                                            | AccVar x -> if x = name then index 
                                                                                       else lookupidx tail ( index + ( allsize typ) )
                                                             | AccIndex( acc3, idx ) ->  match acc3 with
                                                                                         | AccVar y ->  if name = y then 
-                                                                                                       let (i, store2) = eval idx locEnv gloEnv structEnv store1
-                                                                                                       (index + i)
+                                                                                                          let size = 
+                                                                                                            match typ with
+                                                                                                            | TypA(typ,Some i) -> i
+                                                                                                            | TypA(typ,None) -> 0
+                                                                                                          let (i, store2) = eval idx locEnv gloEnv structEnv store1
+                                                                                                          if(i.int>=size) then  failwith( " index out of size" )
+                                                                                                          elif(i.int<0) then failwith( " index out of size" )
+                                                                                                                        else (index + i.int)
                                                                                                        else lookupidx tail (index + (allsize typ))
                               ((a+(lookupidx param 0)),store1)
 
-and evals es locEnv gloEnv structEnv store : int list * store = 
+and evals es locEnv gloEnv structEnv store : mem list * store = 
     match es with 
     | []     -> ([], store)
     | e1::er ->
@@ -696,7 +582,7 @@ and evals es locEnv gloEnv structEnv store : int list * store =
       let (vr, storer) = evals er locEnv gloEnv structEnv store1 
       (v1::vr, storer) 
     
-and callfun f es locEnv gloEnv structEnv store : int * store =
+and callfun f es locEnv gloEnv structEnv store : mem * store =
 
     info (fun () -> printf "callfun: %A\n"  (f, locEnv, gloEnv,structEnv,store))
 
@@ -710,7 +596,7 @@ and callfun f es locEnv gloEnv structEnv store : int * store =
     let res = store3.TryFind(-1) 
     let restore = store3.Remove(-1)
     match res with
-    | None -> (0,restore)
+    | None -> ( BOOLEAN false,restore)
     | Some i -> (i,restore)
 
 (* Interpret a complete micro-C program by initializing the store 

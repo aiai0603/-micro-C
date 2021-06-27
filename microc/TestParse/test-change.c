@@ -7,7 +7,6 @@ Void main() {
 
     print("%c",(char)2);
 
-    print("%f",((float)12)+12.25);
 
 
 }

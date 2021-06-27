@@ -45,6 +45,9 @@ let keyword s =
     | "case"    -> CASE
     | "break"   -> BREAK 
     | "in"      -> IN
+    | "try"     -> TRY
+    | "catch"   -> CATCH
+    | "throw"   -> THROW
     | "continue"-> CONTINUE
     | "default" -> DEFAULT
     | "Struct"  -> STRUCT

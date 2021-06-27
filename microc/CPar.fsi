@@ -27,6 +27,9 @@ type token =
   | GE
   | LE
   | BOOL
+  | TRY
+  | CATCH
+  | THROW
   | PLUS
   | MINUS
   | TIMES
@@ -105,6 +108,9 @@ type tokenId =
     | TOKEN_GE
     | TOKEN_LE
     | TOKEN_BOOL
+    | TOKEN_TRY
+    | TOKEN_CATCH
+    | TOKEN_THROW
     | TOKEN_PLUS
     | TOKEN_MINUS
     | TOKEN_TIMES

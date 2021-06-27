@@ -6,7 +6,7 @@ Void main(Int n) {
     Int bb;
     bb=1;
 
-    print("%d",a);
+    print("%d",a[0]);
     return 0;
 
 }

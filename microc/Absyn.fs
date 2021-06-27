@@ -77,7 +77,7 @@ and stmt =
   | Catch of expr * stmt
  
 and Exception = 
-    | Exception of string
+  | Exception of string
                                                                    
 and stmtordec =                                                    
   | Dec of typ * string              (* Local variable declaration  *)
